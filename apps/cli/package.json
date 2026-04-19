@@ -1,0 +1,16 @@
+{
+  "name": "bitron-cli",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "bitron": "src/index.js"
+  },
+  "dependencies": {
+    "@bitron/agents": "workspace:*",
+    "@bitron/openclaw-adapter": "workspace:*",
+    "tsx": "^4.19.0"
+  },
+  "scripts": {
+    "bitron": "tsx src/index.ts"
+  }
+}
