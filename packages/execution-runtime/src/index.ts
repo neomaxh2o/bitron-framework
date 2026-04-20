@@ -1,3 +1,10 @@
+import {
+  getDefaultNodeExecBridge,
+  type NodeExecBridge,
+  type BridgeExecuteInput,
+  type BridgeExecuteResult
+} from "./bridge";
+
 export type RuntimeExecMode = "executed" | "backend-unavailable";
 
 export interface ExecuteNodeCommandInput {
@@ -24,19 +31,18 @@ export interface NodeExecRuntime {
 }
 
 export class OpenClawExecRuntime implements NodeExecRuntime {
+  constructor(private readonly bridge: NodeExecBridge = getDefaultNodeExecBridge()) {}
+
   async execute(input: ExecuteNodeCommandInput): Promise<ExecuteNodeCommandResult> {
+    const result: BridgeExecuteResult = await this.bridge.execute(input as BridgeExecuteInput);
+
     return {
-      success: false,
-      stdout: "",
-      stderr:
-        `Runtime stub: el backend real OpenClaw exec host=node todavía no está conectado. ` +
-        `Payload preparado para nodo=${input.node}, command="${input.command}", security=${input.security}, ask=${input.ask}.`,
-      code: 1,
-      mode: "backend-unavailable",
-      backend: {
-        type: "openclaw-exec-host-node",
-        available: false
-      }
+      success: result.success,
+      stdout: result.stdout,
+      stderr: result.stderr,
+      code: result.code,
+      mode: result.mode,
+      backend: result.backend
     };
   }
 }
@@ -44,3 +50,9 @@ export class OpenClawExecRuntime implements NodeExecRuntime {
 export function getDefaultNodeExecRuntime(): NodeExecRuntime {
   return new OpenClawExecRuntime();
 }
+
+export type {
+  NodeExecBridge,
+  BridgeExecuteInput,
+  BridgeExecuteResult
+} from "./bridge";
