@@ -1,0 +1,65 @@
+[
+  {
+    "timestamp": "2026-04-19T23:46:35.225Z",
+    "jobId": "job-1776642395224-6u8j0t",
+    "level": "info",
+    "event": "workflow_started",
+    "data": {
+      "workflow": "standard-delivery",
+      "task": "crear sistema de parking"
+    }
+  },
+  {
+    "timestamp": "2026-04-19T23:46:35.227Z",
+    "jobId": "job-1776642395224-6u8j0t",
+    "level": "info",
+    "event": "planner_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776642395224-6u8j0t",
+        "agent": "planner-agent",
+        "node": "default-node"
+      },
+      "plan": "Plan generado para: crear sistema de parking"
+    }
+  },
+  {
+    "timestamp": "2026-04-19T23:46:35.228Z",
+    "jobId": "job-1776642395224-6u8j0t",
+    "level": "info",
+    "event": "builder_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776642395224-6u8j0t",
+        "agent": "builder-agent",
+        "node": "default-node"
+      },
+      "build": "Build ejecutado para \"crear sistema de parking\" siguiendo \"Plan generado para: crear sistema de parking\""
+    }
+  },
+  {
+    "timestamp": "2026-04-19T23:46:35.229Z",
+    "jobId": "job-1776642395224-6u8j0t",
+    "level": "info",
+    "event": "validator_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776642395224-6u8j0t",
+        "agent": "validator-agent",
+        "node": "default-node"
+      },
+      "valid": true,
+      "report": "Validación correcta para \"crear sistema de parking\""
+    }
+  },
+  {
+    "timestamp": "2026-04-19T23:46:35.230Z",
+    "jobId": "job-1776642395224-6u8j0t",
+    "level": "info",
+    "event": "workflow_finished",
+    "data": {
+      "status": "ok",
+      "summaryPath": "/root/bitron-framework/.bitron/artifacts/job-1776642395224-6u8j0t/summary.json"
+    }
+  }
+]

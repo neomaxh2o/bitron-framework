@@ -4,10 +4,14 @@ export interface ExecutionContext {
   node: string;
 }
 
-export function createContext(agent: string): ExecutionContext {
+export function createJobId(): string {
+  return `job-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function createContext(jobId: string, agent: string, node = "default-node"): ExecutionContext {
   return {
-    jobId: `job-${Date.now()}`,
+    jobId,
     agent,
-    node: "default-node"
+    node
   };
 }

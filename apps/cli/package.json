@@ -6,8 +6,12 @@
     "bitron": "src/index.js"
   },
   "dependencies": {
+    "@bitron/core": "workspace:*",
     "@bitron/agents": "workspace:*",
     "@bitron/openclaw-adapter": "workspace:*",
+    "@bitron/workflows": "workspace:*",
+    "@bitron/artifacts": "workspace:*",
+    "@bitron/logger": "workspace:*",
     "tsx": "^4.19.0"
   },
   "scripts": {

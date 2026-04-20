@@ -17,9 +17,21 @@ importers:
       '@bitron/agents':
         specifier: workspace:*
         version: link:../../packages/agents
+      '@bitron/artifacts':
+        specifier: workspace:*
+        version: link:../../packages/artifacts
+      '@bitron/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@bitron/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@bitron/openclaw-adapter':
         specifier: workspace:*
         version: link:../../packages/openclaw-adapter
+      '@bitron/workflows':
+        specifier: workspace:*
+        version: link:../../packages/workflows
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
@@ -30,9 +42,28 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/artifacts: {}
+
   packages/core: {}
 
+  packages/logger: {}
+
   packages/openclaw-adapter: {}
+
+  packages/workflows:
+    dependencies:
+      '@bitron/agents':
+        specifier: workspace:*
+        version: link:../agents
+      '@bitron/artifacts':
+        specifier: workspace:*
+        version: link:../artifacts
+      '@bitron/core':
+        specifier: workspace:*
+        version: link:../core
+      '@bitron/logger':
+        specifier: workspace:*
+        version: link:../logger
 
 packages:
 
