@@ -1,0 +1,9 @@
+{
+  "context": {
+    "jobId": "job-1776645431939-vx9q85",
+    "agent": "validator-agent",
+    "node": "intradia-vps-2"
+  },
+  "valid": true,
+  "report": "Validación correcta para \"test node propagation\""
+}

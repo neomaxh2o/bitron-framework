@@ -2,12 +2,14 @@ import { createJobId, createContext } from "@bitron/core";
 import { plannerAgent, builderAgent, validatorAgent } from "@bitron/agents";
 import { writeArtifact } from "@bitron/artifacts";
 import { appendLog, appendEvent, getJobLogPaths } from "@bitron/logger";
+import { preflightBasic } from "@bitron/openclaw-adapter";
 
 export interface WorkflowResult {
   workflow: string;
   jobId: string;
   status: "ok" | "failed";
   artifacts: {
+    preflight: string;
     planner: string;
     builder: string;
     validator: string;
@@ -35,56 +37,130 @@ export async function runStandardDelivery(task: string): Promise<WorkflowResult>
     data: { workflow: "standard-delivery", task }
   });
 
-  const plannerContext = createContext(jobId, "planner-agent");
+  // =========================
+  // PRECHECK DEL NODO
+  // =========================
+  const preflight = await preflightBasic();
+
+  const node = preflight.node || "unknown-node";
+
+  steps.push({
+    step: "preflight",
+    status: preflight.success ? "ok" : "failed",
+    output: preflight
+  });
+
+  const preflightPath = writeArtifact(jobId, "preflight.json", preflight);
+
+  appendLog(jobId, `Preflight completed on node ${node} with status: ${preflight.success ? "ok" : "failed"}`);
+  appendEvent(jobId, {
+    level: preflight.success ? "info" : "error",
+    event: "preflight_completed",
+    data: preflight
+  });
+
+  // FAIL FAST
+  if (!preflight.success) {
+    const failedResult: WorkflowResult = {
+      workflow: "standard-delivery",
+      jobId,
+      status: "failed",
+      artifacts: {
+        preflight: preflightPath,
+        planner: "",
+        builder: "",
+        validator: "",
+        summary: ""
+      },
+      logs: getJobLogPaths(jobId),
+      steps
+    };
+
+    const summaryPath = writeArtifact(jobId, "summary.json", failedResult);
+    failedResult.artifacts.summary = summaryPath;
+
+    appendLog(jobId, "Workflow aborted due to failed preflight");
+    appendEvent(jobId, {
+      level: "error",
+      event: "workflow_aborted",
+      data: { reason: "preflight_failed", summaryPath }
+    });
+
+    return failedResult;
+  }
+
+  // =========================
+  // PLANNER
+  // =========================
+  const plannerContext = createContext(jobId, "planner-agent", node);
   const plan = plannerAgent(plannerContext, task);
+
   steps.push({
     step: "planner",
     status: "ok",
     output: plan
   });
+
   const plannerPath = writeArtifact(jobId, "planner.json", plan);
-  appendLog(jobId, "Planner step completed");
+
+  appendLog(jobId, `Planner completed on node ${node}`);
   appendEvent(jobId, {
     level: "info",
     event: "planner_completed",
     data: plan
   });
 
-  const builderContext = createContext(jobId, "builder-agent");
+  // =========================
+  // BUILDER
+  // =========================
+  const builderContext = createContext(jobId, "builder-agent", node);
   const build = builderAgent(builderContext, task, plan.plan);
+
   steps.push({
     step: "builder",
     status: "ok",
     output: build
   });
+
   const builderPath = writeArtifact(jobId, "builder.json", build);
-  appendLog(jobId, "Builder step completed");
+
+  appendLog(jobId, `Builder completed on node ${node}`);
   appendEvent(jobId, {
     level: "info",
     event: "builder_completed",
     data: build
   });
 
-  const validatorContext = createContext(jobId, "validator-agent");
+  // =========================
+  // VALIDATOR
+  // =========================
+  const validatorContext = createContext(jobId, "validator-agent", node);
   const validation = validatorAgent(validatorContext, task, build.build);
+
   steps.push({
     step: "validator",
     status: validation.valid ? "ok" : "failed",
     output: validation
   });
+
   const validatorPath = writeArtifact(jobId, "validator.json", validation);
-  appendLog(jobId, `Validator step completed with status: ${validation.valid ? "ok" : "failed"}`);
+
+  appendLog(jobId, `Validator completed on node ${node} with status: ${validation.valid ? "ok" : "failed"}`);
   appendEvent(jobId, {
     level: validation.valid ? "info" : "error",
     event: "validator_completed",
     data: validation
   });
 
+  // =========================
+  // RESULTADO FINAL
+  // =========================
   const result: WorkflowResult = {
     workflow: "standard-delivery",
     jobId,
     status: validation.valid ? "ok" : "failed",
     artifacts: {
+      preflight: preflightPath,
       planner: plannerPath,
       builder: builderPath,
       validator: validatorPath,
@@ -97,11 +173,11 @@ export async function runStandardDelivery(task: string): Promise<WorkflowResult>
   const summaryPath = writeArtifact(jobId, "summary.json", result);
   result.artifacts.summary = summaryPath;
 
-  appendLog(jobId, `Workflow finished with status: ${result.status}`);
+  appendLog(jobId, `Workflow finished on node ${node} with status: ${result.status}`);
   appendEvent(jobId, {
     level: result.status === "ok" ? "info" : "error",
     event: "workflow_finished",
-    data: { status: result.status, summaryPath }
+    data: { status: result.status, node, summaryPath }
   });
 
   return result;

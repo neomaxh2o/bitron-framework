@@ -1,0 +1,8 @@
+{
+  "context": {
+    "jobId": "job-1776645431939-vx9q85",
+    "agent": "builder-agent",
+    "node": "intradia-vps-2"
+  },
+  "build": "Build ejecutado para \"test node propagation\" siguiendo \"Plan generado para: test node propagation\""
+}

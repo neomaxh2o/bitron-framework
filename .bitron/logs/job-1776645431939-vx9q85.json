@@ -1,0 +1,125 @@
+[
+  {
+    "timestamp": "2026-04-20T00:37:11.940Z",
+    "jobId": "job-1776645431939-vx9q85",
+    "level": "info",
+    "event": "workflow_started",
+    "data": {
+      "workflow": "standard-delivery",
+      "task": "test node propagation"
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:37:15.073Z",
+    "jobId": "job-1776645431939-vx9q85",
+    "level": "info",
+    "event": "preflight_completed",
+    "data": {
+      "success": true,
+      "node": "intradia-vps-2",
+      "checks": [
+        {
+          "bin": "bash",
+          "found": true,
+          "path": "/usr/bin/bash"
+        },
+        {
+          "bin": "sh",
+          "found": true,
+          "path": "/usr/bin/sh"
+        },
+        {
+          "bin": "node",
+          "found": true,
+          "path": "/usr/bin/node"
+        },
+        {
+          "bin": "npm",
+          "found": true,
+          "path": "/usr/bin/npm"
+        },
+        {
+          "bin": "git",
+          "found": true,
+          "path": "/usr/bin/git"
+        },
+        {
+          "bin": "python3",
+          "found": true,
+          "path": "/usr/bin/python3"
+        }
+      ],
+      "missing": [],
+      "raw": {
+        "ok": true,
+        "nodeId": "30276fe423e61109b40d7995427ed4ad2074f9c5f97650133e2ce8d015d40e85",
+        "command": "system.which",
+        "payload": {
+          "bins": {
+            "bash": "/usr/bin/bash",
+            "sh": "/usr/bin/sh",
+            "node": "/usr/bin/node",
+            "npm": "/usr/bin/npm",
+            "git": "/usr/bin/git",
+            "python3": "/usr/bin/python3"
+          }
+        },
+        "payloadJSON": "{\"bins\":{\"bash\":\"/usr/bin/bash\",\"sh\":\"/usr/bin/sh\",\"node\":\"/usr/bin/node\",\"npm\":\"/usr/bin/npm\",\"git\":\"/usr/bin/git\",\"python3\":\"/usr/bin/python3\"}}"
+      }
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:37:15.074Z",
+    "jobId": "job-1776645431939-vx9q85",
+    "level": "info",
+    "event": "planner_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776645431939-vx9q85",
+        "agent": "planner-agent",
+        "node": "intradia-vps-2"
+      },
+      "plan": "Plan generado para: test node propagation"
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:37:15.075Z",
+    "jobId": "job-1776645431939-vx9q85",
+    "level": "info",
+    "event": "builder_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776645431939-vx9q85",
+        "agent": "builder-agent",
+        "node": "intradia-vps-2"
+      },
+      "build": "Build ejecutado para \"test node propagation\" siguiendo \"Plan generado para: test node propagation\""
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:37:15.075Z",
+    "jobId": "job-1776645431939-vx9q85",
+    "level": "info",
+    "event": "validator_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776645431939-vx9q85",
+        "agent": "validator-agent",
+        "node": "intradia-vps-2"
+      },
+      "valid": true,
+      "report": "Validación correcta para \"test node propagation\""
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:37:15.076Z",
+    "jobId": "job-1776645431939-vx9q85",
+    "level": "info",
+    "event": "workflow_finished",
+    "data": {
+      "status": "ok",
+      "node": "intradia-vps-2",
+      "summaryPath": "/root/bitron-framework/.bitron/artifacts/job-1776645431939-vx9q85/summary.json"
+    }
+  }
+]

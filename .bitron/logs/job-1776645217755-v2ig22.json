@@ -1,0 +1,124 @@
+[
+  {
+    "timestamp": "2026-04-20T00:33:37.756Z",
+    "jobId": "job-1776645217755-v2ig22",
+    "level": "info",
+    "event": "workflow_started",
+    "data": {
+      "workflow": "standard-delivery",
+      "task": "crear sistema de parking"
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:33:40.790Z",
+    "jobId": "job-1776645217755-v2ig22",
+    "level": "info",
+    "event": "preflight_completed",
+    "data": {
+      "success": true,
+      "node": "intradia-vps-2",
+      "checks": [
+        {
+          "bin": "bash",
+          "found": true,
+          "path": "/usr/bin/bash"
+        },
+        {
+          "bin": "sh",
+          "found": true,
+          "path": "/usr/bin/sh"
+        },
+        {
+          "bin": "node",
+          "found": true,
+          "path": "/usr/bin/node"
+        },
+        {
+          "bin": "npm",
+          "found": true,
+          "path": "/usr/bin/npm"
+        },
+        {
+          "bin": "git",
+          "found": true,
+          "path": "/usr/bin/git"
+        },
+        {
+          "bin": "python3",
+          "found": true,
+          "path": "/usr/bin/python3"
+        }
+      ],
+      "missing": [],
+      "raw": {
+        "ok": true,
+        "nodeId": "30276fe423e61109b40d7995427ed4ad2074f9c5f97650133e2ce8d015d40e85",
+        "command": "system.which",
+        "payload": {
+          "bins": {
+            "bash": "/usr/bin/bash",
+            "sh": "/usr/bin/sh",
+            "node": "/usr/bin/node",
+            "npm": "/usr/bin/npm",
+            "git": "/usr/bin/git",
+            "python3": "/usr/bin/python3"
+          }
+        },
+        "payloadJSON": "{\"bins\":{\"bash\":\"/usr/bin/bash\",\"sh\":\"/usr/bin/sh\",\"node\":\"/usr/bin/node\",\"npm\":\"/usr/bin/npm\",\"git\":\"/usr/bin/git\",\"python3\":\"/usr/bin/python3\"}}"
+      }
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:33:40.791Z",
+    "jobId": "job-1776645217755-v2ig22",
+    "level": "info",
+    "event": "planner_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776645217755-v2ig22",
+        "agent": "planner-agent",
+        "node": "default-node"
+      },
+      "plan": "Plan generado para: crear sistema de parking"
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:33:40.792Z",
+    "jobId": "job-1776645217755-v2ig22",
+    "level": "info",
+    "event": "builder_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776645217755-v2ig22",
+        "agent": "builder-agent",
+        "node": "default-node"
+      },
+      "build": "Build ejecutado para \"crear sistema de parking\" siguiendo \"Plan generado para: crear sistema de parking\""
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:33:40.793Z",
+    "jobId": "job-1776645217755-v2ig22",
+    "level": "info",
+    "event": "validator_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776645217755-v2ig22",
+        "agent": "validator-agent",
+        "node": "default-node"
+      },
+      "valid": true,
+      "report": "Validación correcta para \"crear sistema de parking\""
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:33:40.794Z",
+    "jobId": "job-1776645217755-v2ig22",
+    "level": "info",
+    "event": "workflow_finished",
+    "data": {
+      "status": "ok",
+      "summaryPath": "/root/bitron-framework/.bitron/artifacts/job-1776645217755-v2ig22/summary.json"
+    }
+  }
+]

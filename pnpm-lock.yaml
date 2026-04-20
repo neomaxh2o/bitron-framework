@@ -64,6 +64,9 @@ importers:
       '@bitron/logger':
         specifier: workspace:*
         version: link:../logger
+      '@bitron/openclaw-adapter':
+        specifier: workspace:*
+        version: link:../openclaw-adapter
 
 packages:
 

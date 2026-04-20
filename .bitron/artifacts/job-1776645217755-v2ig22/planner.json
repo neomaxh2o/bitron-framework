@@ -1,0 +1,8 @@
+{
+  "context": {
+    "jobId": "job-1776645217755-v2ig22",
+    "agent": "planner-agent",
+    "node": "default-node"
+  },
+  "plan": "Plan generado para: crear sistema de parking"
+}

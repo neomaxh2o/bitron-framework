@@ -1,0 +1,6 @@
+[2026-04-20T00:37:11.940Z] [job-1776645431939-vx9q85] Workflow standard-delivery started for task: test node propagation
+[2026-04-20T00:37:15.073Z] [job-1776645431939-vx9q85] Preflight completed on node intradia-vps-2 with status: ok
+[2026-04-20T00:37:15.074Z] [job-1776645431939-vx9q85] Planner completed on node intradia-vps-2
+[2026-04-20T00:37:15.074Z] [job-1776645431939-vx9q85] Builder completed on node intradia-vps-2
+[2026-04-20T00:37:15.075Z] [job-1776645431939-vx9q85] Validator completed on node intradia-vps-2 with status: ok
+[2026-04-20T00:37:15.076Z] [job-1776645431939-vx9q85] Workflow finished on node intradia-vps-2 with status: ok

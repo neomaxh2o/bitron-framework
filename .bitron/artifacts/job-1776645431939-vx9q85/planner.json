@@ -1,0 +1,8 @@
+{
+  "context": {
+    "jobId": "job-1776645431939-vx9q85",
+    "agent": "planner-agent",
+    "node": "intradia-vps-2"
+  },
+  "plan": "Plan generado para: test node propagation"
+}

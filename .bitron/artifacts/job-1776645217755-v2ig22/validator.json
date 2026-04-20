@@ -1,0 +1,9 @@
+{
+  "context": {
+    "jobId": "job-1776645217755-v2ig22",
+    "agent": "validator-agent",
+    "node": "default-node"
+  },
+  "valid": true,
+  "report": "Validación correcta para \"crear sistema de parking\""
+}
