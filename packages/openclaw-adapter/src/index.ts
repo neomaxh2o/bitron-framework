@@ -43,6 +43,23 @@ export interface BuilderProbeResult {
   raw?: any;
 }
 
+export interface ExecSpec {
+  command: string;
+  args?: string[];
+  cwd?: string;
+  env?: Record<string, string>;
+}
+
+export interface ExecOnNodeResult {
+  success: boolean;
+  node: string;
+  mode: "planned" | "not-implemented";
+  spec: ExecSpec;
+  stdout: string;
+  stderr: string;
+  code: number | null;
+}
+
 const DEFAULT_NODE = "intradia-vps-2";
 
 const PREFLIGHT_PROFILES: Record<string, string[]> = {
@@ -75,43 +92,47 @@ function execCommand(fullCommand: string): Promise<RunResult> {
   });
 }
 
+async function invokeSystemWhich(bins: string[], node?: string): Promise<RunResult> {
+  const target = node || DEFAULT_NODE;
+  const params = JSON.stringify({ bins }).replace(/(["\\$`])/g, "\\$1");
+  const fullCommand = `openclaw nodes invoke --node ${target} --command system.which --params "${params}"`;
+
+  console.log("[Bitron → OpenClaw system.which] Ejecutando:", fullCommand);
+
+  return execCommand(fullCommand);
+}
+
+function parseWhichPayload(stdout: string): any | null {
+  try {
+    return JSON.parse(stdout);
+  } catch {
+    return null;
+  }
+}
+
 export function listPreflightProfiles(): string[] {
   return Object.keys(PREFLIGHT_PROFILES);
 }
 
 export async function whichOnNode(bin: string, node?: string): Promise<WhichResult> {
-  const target = node || DEFAULT_NODE;
-  const params = JSON.stringify({ bins: [bin] }).replace(/(["\\$`])/g, "\\$1");
-  const fullCommand = `openclaw nodes invoke --node ${target} --command system.which --params "${params}"`;
-
-  console.log("[Bitron → OpenClaw which] Ejecutando:", fullCommand);
-
-  const result = await execCommand(fullCommand);
+  const result = await invokeSystemWhich([bin], node);
 
   if (!result.success) {
     return result;
   }
 
-  try {
-    const parsed = JSON.parse(result.stdout);
-    return {
-      ...result,
-      parsed
-    };
-  } catch {
-    return result;
-  }
+  const parsed = parseWhichPayload(result.stdout);
+
+  return {
+    ...result,
+    parsed: parsed || undefined
+  };
 }
 
 export async function preflightProfile(profile = "basic", node?: string): Promise<PreflightResult> {
   const target = node || DEFAULT_NODE;
   const bins = PREFLIGHT_PROFILES[profile] || PREFLIGHT_PROFILES.basic;
-  const params = JSON.stringify({ bins }).replace(/(["\\$`])/g, "\\$1");
-  const fullCommand = `openclaw nodes invoke --node ${target} --command system.which --params "${params}"`;
-
-  console.log(`[Bitron → OpenClaw preflight:${profile}] Ejecutando:`, fullCommand);
-
-  const result = await execCommand(fullCommand);
+  const result = await invokeSystemWhich(bins, target);
 
   if (!result.success) {
     return {
@@ -123,35 +144,25 @@ export async function preflightProfile(profile = "basic", node?: string): Promis
     };
   }
 
-  try {
-    const parsed = JSON.parse(result.stdout);
-    const resolvedBins = parsed?.payload?.bins || {};
+  const parsed = parseWhichPayload(result.stdout);
+  const resolvedBins = parsed?.payload?.bins || {};
 
-    const checks: PreflightItem[] = bins.map((bin) => ({
-      bin,
-      found: Boolean(resolvedBins[bin]),
-      path: resolvedBins[bin] || null
-    }));
+  const checks: PreflightItem[] = bins.map((bin) => ({
+    bin,
+    found: Boolean(resolvedBins[bin]),
+    path: resolvedBins[bin] || null
+  }));
 
-    const missing = checks.filter((item) => !item.found).map((item) => item.bin);
+  const missing = checks.filter((item) => !item.found).map((item) => item.bin);
 
-    return {
-      success: missing.length === 0,
-      node: target,
-      profile,
-      checks,
-      missing,
-      raw: parsed
-    };
-  } catch {
-    return {
-      success: false,
-      node: target,
-      profile,
-      checks: bins.map((bin) => ({ bin, found: false, path: null })),
-      missing: bins
-    };
-  }
+  return {
+    success: missing.length === 0,
+    node: target,
+    profile,
+    checks,
+    missing,
+    raw: parsed || undefined
+  };
 }
 
 export async function preflightBasic(node?: string): Promise<PreflightResult> {
@@ -161,12 +172,7 @@ export async function preflightBasic(node?: string): Promise<PreflightResult> {
 export async function builderProbeOnNode(node?: string): Promise<BuilderProbeResult> {
   const target = node || DEFAULT_NODE;
   const bins = ["node", "npm", "git", "pwd"];
-  const params = JSON.stringify({ bins }).replace(/(["\\$`])/g, "\\$1");
-  const fullCommand = `openclaw nodes invoke --node ${target} --command system.which --params "${params}"`;
-
-  console.log("[Bitron → OpenClaw builder-probe] Ejecutando:", fullCommand);
-
-  const result = await execCommand(fullCommand);
+  const result = await invokeSystemWhich(bins, target);
 
   if (!result.success) {
     return {
@@ -176,34 +182,40 @@ export async function builderProbeOnNode(node?: string): Promise<BuilderProbeRes
     };
   }
 
-  try {
-    const parsed = JSON.parse(result.stdout);
-    const resolvedBins = parsed?.payload?.bins || {};
+  const parsed = parseWhichPayload(result.stdout);
+  const resolvedBins = parsed?.payload?.bins || {};
 
-    return {
-      success: true,
-      node: target,
-      checks: bins.map((bin) => ({
-        bin,
-        found: Boolean(resolvedBins[bin]),
-        path: resolvedBins[bin] || null
-      })),
-      raw: parsed
-    };
-  } catch {
-    return {
-      success: false,
-      node: target,
-      checks: bins.map((bin) => ({ bin, found: false, path: null }))
-    };
-  }
+  return {
+    success: true,
+    node: target,
+    checks: bins.map((bin) => ({
+      bin,
+      found: Boolean(resolvedBins[bin]),
+      path: resolvedBins[bin] || null
+    })),
+    raw: parsed || undefined
+  };
+}
+
+export async function execOnNode(spec: ExecSpec, node?: string): Promise<ExecOnNodeResult> {
+  const target = node || DEFAULT_NODE;
+
+  return {
+    success: false,
+    node: target,
+    mode: "not-implemented",
+    spec,
+    stdout: "",
+    stderr: "execOnNode todavía no está implementado en el adapter. Discovery y preflight sí están activos.",
+    code: 1
+  };
 }
 
 export function runOnNode(command: string, node?: string): Promise<RunResult> {
   return Promise.resolve({
     success: false,
     stdout: "",
-    stderr: 'runOnNode(command) quedó deshabilitado. Usá runWrapper(...) o whichOnNode(...).',
+    stderr: 'runOnNode(command) quedó deshabilitado. Usá runWrapper(...), whichOnNode(...), preflightProfile(...) o execOnNode(...).',
     code: 1
   });
 }
