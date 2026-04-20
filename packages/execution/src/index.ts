@@ -16,6 +16,16 @@ export interface PlannedExecRequest {
   ask: "off" | "ask";
 }
 
+export interface OpenClawExecPayload {
+  exec: {
+    command: string;
+    host: "node";
+    node: string;
+    security: "off" | "allowlist";
+    ask: "off" | "ask";
+  };
+}
+
 export interface ExecReceipt {
   ok: boolean;
   mode: "planned" | "executed";
@@ -37,6 +47,12 @@ export interface ExecReceipt {
     reasons: string[];
   };
   execRequest?: PlannedExecRequest;
+  openclawExecPayload?: OpenClawExecPayload;
+  approvalTarget?: {
+    command: string;
+    node: string;
+    suggestedChecks: string[];
+  };
   stdout: string;
   stderr: string;
   code: number | null;
@@ -102,6 +118,32 @@ export function buildPlannedExecRequest(input: {
   };
 }
 
+export function buildOpenClawExecPayload(input: PlannedExecRequest): OpenClawExecPayload {
+  return {
+    exec: {
+      command: input.command,
+      host: input.host,
+      node: input.node,
+      security: input.security,
+      ask: input.ask
+    }
+  };
+}
+
+export function buildApprovalTarget(input: {
+  command: string;
+  node: string;
+}): ExecReceipt["approvalTarget"] {
+  return {
+    command: input.command,
+    node: input.node,
+    suggestedChecks: [
+      `openclaw approvals get --node ${input.node} --json`,
+      `openclaw nodes describe --node ${input.node}`
+    ]
+  };
+}
+
 export function buildExecReceipt(input: {
   node: string;
   profile: ExecProfile;
@@ -122,6 +164,8 @@ export function buildExecReceipt(input: {
     reasons: string[];
   };
   execRequest?: PlannedExecRequest;
+  openclawExecPayload?: OpenClawExecPayload;
+  approvalTarget?: ExecReceipt["approvalTarget"];
 }): ExecReceipt {
   return {
     ok: input.ok ?? false,
@@ -135,6 +179,8 @@ export function buildExecReceipt(input: {
     backend: input.backend,
     policy: input.policy,
     execRequest: input.execRequest,
+    openclawExecPayload: input.openclawExecPayload,
+    approvalTarget: input.approvalTarget,
     stdout: input.stdout ?? "",
     stderr: input.stderr ?? "",
     code: input.code ?? null

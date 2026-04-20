@@ -15,7 +15,9 @@ import {
   listExecProfiles,
   getExecProfile,
   buildExecReceipt,
-  buildPlannedExecRequest
+  buildPlannedExecRequest,
+  buildOpenClawExecPayload,
+  buildApprovalTarget
 } from "@bitron/execution";
 import { buildExecutionBackendConfig, checkExecPolicy } from "@bitron/runtime";
 import { runStandardDelivery, runNodeBuild } from "@bitron/workflows";
@@ -121,6 +123,12 @@ async function main() {
       ask: backendConfig.ask
     });
 
+    const openclawExecPayload = buildOpenClawExecPayload(execRequest);
+    const approvalTarget = buildApprovalTarget({
+      command: execRequest.command,
+      node: targetNode
+    });
+
     const adapterResult = await execOnNode(
       { command: profile.command, args: profile.args },
       targetNode
@@ -136,7 +144,9 @@ async function main() {
       code: adapterResult.code,
       backend: backendConfig,
       policy,
-      execRequest
+      execRequest,
+      openclawExecPayload,
+      approvalTarget
     });
 
     console.log(JSON.stringify({ preflight, adapterResult, receipt }, null, 2));
