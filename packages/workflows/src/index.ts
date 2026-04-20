@@ -28,9 +28,12 @@ export interface WorkflowResult {
   }>;
 }
 
-export async function runStandardDelivery(task: string, requestedNode?: string): Promise<WorkflowResult> {
-  const workflowName = "standard-delivery";
-  const workflowPreflightProfile = "basic";
+async function runWorkflowBase(
+  workflowName: string,
+  workflowPreflightProfile: string,
+  task: string,
+  requestedNode?: string
+): Promise<WorkflowResult> {
   const jobId = createJobId();
   const steps: WorkflowResult["steps"] = [];
 
@@ -189,4 +192,12 @@ export async function runStandardDelivery(task: string, requestedNode?: string):
   writeArtifact(jobId, "summary.json", result);
 
   return result;
+}
+
+export async function runStandardDelivery(task: string, requestedNode?: string): Promise<WorkflowResult> {
+  return runWorkflowBase("standard-delivery", "basic", task, requestedNode);
+}
+
+export async function runNodeBuild(task: string, requestedNode?: string): Promise<WorkflowResult> {
+  return runWorkflowBase("node-build", "nodejs", task, requestedNode);
 }

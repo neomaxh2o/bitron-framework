@@ -1,0 +1,8 @@
+{
+  "context": {
+    "jobId": "job-1776647456238-7bz8yh",
+    "agent": "planner-agent",
+    "node": "intradia-vps-2"
+  },
+  "plan": "Plan generado para: build frontend"
+}

@@ -1,0 +1,9 @@
+{
+  "context": {
+    "jobId": "job-1776647456238-7bz8yh",
+    "agent": "validator-agent",
+    "node": "intradia-vps-2"
+  },
+  "valid": true,
+  "report": "Validación correcta para \"build frontend\""
+}

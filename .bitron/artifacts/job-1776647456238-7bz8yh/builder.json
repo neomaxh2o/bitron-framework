@@ -1,0 +1,8 @@
+{
+  "context": {
+    "jobId": "job-1776647456238-7bz8yh",
+    "agent": "builder-agent",
+    "node": "intradia-vps-2"
+  },
+  "build": "Build ejecutado para \"build frontend\" siguiendo \"Plan generado para: build frontend\""
+}

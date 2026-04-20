@@ -1,0 +1,3 @@
+[2026-04-20T01:12:03.697Z] [job-1776647523696-xf0q6z] Workflow node-build started for task: build eparking
+[2026-04-20T01:12:06.808Z] [job-1776647523696-xf0q6z] Preflight(nodejs) completed on node eparking with status: failed
+[2026-04-20T01:12:06.809Z] [job-1776647523696-xf0q6z] Workflow aborted due to failed preflight on node eparking
