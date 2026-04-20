@@ -88,10 +88,10 @@ async function main() {
     return;
   }
 
-  if (command === "exec-plan") {
+  if (command === "exec-ready" || command === "exec-plan") {
     const profileId = cleanArgs[1];
     if (!profileId) {
-      console.error("Debes indicar un exec profile. Ejemplo: bitron exec-plan node-version-check --node intradia-vps-2");
+      console.error(`Debes indicar un exec profile. Ejemplo: bitron ${command} node-version-check --node intradia-vps-2`);
       process.exit(1);
     }
 
@@ -128,6 +128,21 @@ async function main() {
       command: execRequest.command,
       node: targetNode
     });
+
+    if (command === "exec-ready") {
+      console.log(JSON.stringify({
+        ready: preflight.success && policy.allowed,
+        node: targetNode,
+        profileId: profile.id,
+        preflight,
+        backend: backendConfig,
+        policy,
+        execRequest,
+        openclawExecPayload,
+        approvalTarget
+      }, null, 2));
+      return;
+    }
 
     const adapterResult = await execOnNode(
       { command: profile.command, args: profile.args },
@@ -187,6 +202,7 @@ async function main() {
 
   console.log("Uso:");
   console.log('  pnpm --filter bitron-cli run bitron -- exec-profile-list');
+  console.log('  pnpm --filter bitron-cli run bitron -- exec-ready node-version-check --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- exec-plan node-version-check --node intradia-vps-2');
 }
 
