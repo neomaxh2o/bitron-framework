@@ -11,6 +11,7 @@ import {
   listPreflightProfiles,
   execOnNode
 } from "@bitron/openclaw-adapter";
+import { listExecProfiles, getExecProfile, buildExecReceipt } from "@bitron/execution";
 import { runStandardDelivery, runNodeBuild } from "@bitron/workflows";
 
 const rawArgs = process.argv.slice(2);
@@ -79,24 +80,47 @@ async function main() {
     process.exit(1);
   }
 
-  if (command === "exec-plan") {
-    const bin = cleanArgs[1];
-    const execArgs = cleanArgs.slice(2);
+  if (command === "exec-profile-list") {
+    console.log(JSON.stringify(listExecProfiles(), null, 2));
+    return;
+  }
 
-    if (!bin) {
-      console.error("Debes indicar un comando. Ejemplo: bitron exec-plan node --version --node intradia-vps-2");
+  if (command === "exec-plan") {
+    const profileId = cleanArgs[1];
+
+    if (!profileId) {
+      console.error("Debes indicar un exec profile. Ejemplo: bitron exec-plan node-version-check --node intradia-vps-2");
       process.exit(1);
     }
 
-    const result = await execOnNode(
+    const profile = getExecProfile(profileId);
+
+    if (!profile) {
+      console.error(`Exec profile no reconocido: ${profileId}`);
+      process.exit(1);
+    }
+
+    const targetNode = node || "intradia-vps-2";
+
+    const adapterResult = await execOnNode(
       {
-        command: bin,
-        args: execArgs
+        command: profile.command,
+        args: profile.args
       },
-      node
+      targetNode
     );
 
-    console.log(JSON.stringify(result, null, 2));
+    const receipt = buildExecReceipt({
+      node: targetNode,
+      profile,
+      mode: adapterResult.success ? "executed" : "planned",
+      ok: adapterResult.success,
+      stdout: adapterResult.stdout,
+      stderr: adapterResult.stderr,
+      code: adapterResult.code
+    });
+
+    console.log(JSON.stringify({ adapterResult, receipt }, null, 2));
     return;
   }
 
@@ -136,13 +160,10 @@ async function main() {
   }
 
   console.log("Uso:");
-  console.log('  pnpm --filter bitron-cli run bitron -- plan "tu tarea" --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- which bash --node intradia-vps-2');
-  console.log('  pnpm --filter bitron-cli run bitron -- preflight basic --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- preflight full --node intradia-vps-2');
-  console.log('  pnpm --filter bitron-cli run bitron -- exec-plan node --version --node intradia-vps-2');
-  console.log('  pnpm --filter bitron-cli run bitron -- run "echo hola" --node intradia-vps-2');
-  console.log('  pnpm --filter bitron-cli run bitron -- run-wrapper echo "hola mundo" --node intradia-vps-2');
+  console.log('  pnpm --filter bitron-cli run bitron -- exec-profile-list');
+  console.log('  pnpm --filter bitron-cli run bitron -- exec-plan node-version-check --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- workflow standard-delivery "tu tarea" --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- workflow node-build "build frontend" --node intradia-vps-2');
 }

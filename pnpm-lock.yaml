@@ -23,6 +23,9 @@ importers:
       '@bitron/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@bitron/execution':
+        specifier: workspace:*
+        version: link:../../packages/execution
       '@bitron/logger':
         specifier: workspace:*
         version: link:../../packages/logger
@@ -45,6 +48,8 @@ importers:
   packages/artifacts: {}
 
   packages/core: {}
+
+  packages/execution: {}
 
   packages/logger: {}
 

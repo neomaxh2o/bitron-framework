@@ -12,6 +12,7 @@
     "@bitron/workflows": "workspace:*",
     "@bitron/artifacts": "workspace:*",
     "@bitron/logger": "workspace:*",
+    "@bitron/execution": "workspace:*",
     "tsx": "^4.19.0"
   },
   "scripts": {
