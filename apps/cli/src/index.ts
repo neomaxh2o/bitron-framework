@@ -11,7 +11,12 @@ import {
   listPreflightProfiles,
   execOnNode
 } from "@bitron/openclaw-adapter";
-import { listExecProfiles, getExecProfile, buildExecReceipt } from "@bitron/execution";
+import {
+  listExecProfiles,
+  getExecProfile,
+  buildExecReceipt,
+  buildPlannedExecRequest
+} from "@bitron/execution";
 import { buildExecutionBackendConfig, checkExecPolicy } from "@bitron/runtime";
 import { runStandardDelivery, runNodeBuild } from "@bitron/workflows";
 
@@ -51,7 +56,6 @@ async function main() {
       console.error("Debes indicar un binario. Ejemplo: bitron which bash --node intradia-vps-2");
       process.exit(1);
     }
-
     const result = await whichOnNode(bin, node);
     console.log(JSON.stringify(result, null, 2));
     return;
@@ -59,24 +63,20 @@ async function main() {
 
   if (command === "preflight") {
     const profile = cleanArgs[1];
-
     if (!profile) {
       console.error(`Debes indicar un perfil. Disponibles: ${listPreflightProfiles().join(", ")}`);
       process.exit(1);
     }
-
     if (profile === "basic") {
       const result = await preflightBasic(node);
       console.log(JSON.stringify(result, null, 2));
       return;
     }
-
     if (listPreflightProfiles().includes(profile)) {
       const result = await preflightProfile(profile, node);
       console.log(JSON.stringify(result, null, 2));
       return;
     }
-
     console.error(`Perfil no reconocido. Disponibles: ${listPreflightProfiles().join(", ")}`);
     process.exit(1);
   }
@@ -88,14 +88,12 @@ async function main() {
 
   if (command === "exec-plan") {
     const profileId = cleanArgs[1];
-
     if (!profileId) {
       console.error("Debes indicar un exec profile. Ejemplo: bitron exec-plan node-version-check --node intradia-vps-2");
       process.exit(1);
     }
 
     const profile = getExecProfile(profileId);
-
     if (!profile) {
       console.error(`Exec profile no reconocido: ${profileId}`);
       process.exit(1);
@@ -115,11 +113,16 @@ async function main() {
       preflightMissing: preflight.missing
     });
 
+    const execRequest = buildPlannedExecRequest({
+      node: targetNode,
+      command: profile.command,
+      args: profile.args,
+      security: backendConfig.security,
+      ask: backendConfig.ask
+    });
+
     const adapterResult = await execOnNode(
-      {
-        command: profile.command,
-        args: profile.args
-      },
+      { command: profile.command, args: profile.args },
       targetNode
     );
 
@@ -132,7 +135,8 @@ async function main() {
       stderr: adapterResult.stderr,
       code: adapterResult.code,
       backend: backendConfig,
-      policy
+      policy,
+      execRequest
     });
 
     console.log(JSON.stringify({ preflight, adapterResult, receipt }, null, 2));
@@ -159,14 +163,11 @@ async function main() {
     const task = cleanArgs.slice(2).join(" ");
 
     if (workflowName === "standard-delivery") {
-      const result = await runStandardDelivery(task, node);
-      console.log(JSON.stringify(result, null, 2));
+      console.log(JSON.stringify(await runStandardDelivery(task, node), null, 2));
       return;
     }
-
     if (workflowName === "node-build") {
-      const result = await runNodeBuild(task, node);
-      console.log(JSON.stringify(result, null, 2));
+      console.log(JSON.stringify(await runNodeBuild(task, node), null, 2));
       return;
     }
 
@@ -175,12 +176,8 @@ async function main() {
   }
 
   console.log("Uso:");
-  console.log('  pnpm --filter bitron-cli run bitron -- which bash --node intradia-vps-2');
-  console.log('  pnpm --filter bitron-cli run bitron -- preflight full --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- exec-profile-list');
   console.log('  pnpm --filter bitron-cli run bitron -- exec-plan node-version-check --node intradia-vps-2');
-  console.log('  pnpm --filter bitron-cli run bitron -- workflow standard-delivery "tu tarea" --node intradia-vps-2');
-  console.log('  pnpm --filter bitron-cli run bitron -- workflow node-build "build frontend" --node intradia-vps-2');
 }
 
 main().catch((err) => {

@@ -7,6 +7,15 @@ export interface ExecProfile {
   preflightProfile: string;
 }
 
+export interface PlannedExecRequest {
+  tool: "exec";
+  command: string;
+  host: "node";
+  node: string;
+  security: "off" | "allowlist";
+  ask: "off" | "ask";
+}
+
 export interface ExecReceipt {
   ok: boolean;
   mode: "planned" | "executed";
@@ -27,6 +36,7 @@ export interface ExecReceipt {
     allowed: boolean;
     reasons: string[];
   };
+  execRequest?: PlannedExecRequest;
   stdout: string;
   stderr: string;
   code: number | null;
@@ -67,6 +77,31 @@ export function getExecProfile(profileId: string): ExecProfile | null {
   return EXEC_PROFILES[profileId] || null;
 }
 
+export function buildShellCommand(command: string, args: string[]): string {
+  const esc = (v: string) => {
+    if (/^[A-Za-z0-9_./:-]+$/.test(v)) return v;
+    return `'${v.replace(/'/g, `'\\''`)}'`;
+  };
+  return [command, ...args].map(esc).join(" ");
+}
+
+export function buildPlannedExecRequest(input: {
+  node: string;
+  command: string;
+  args: string[];
+  security: "off" | "allowlist";
+  ask: "off" | "ask";
+}): PlannedExecRequest {
+  return {
+    tool: "exec",
+    command: buildShellCommand(input.command, input.args),
+    host: "node",
+    node: input.node,
+    security: input.security,
+    ask: input.ask
+  };
+}
+
 export function buildExecReceipt(input: {
   node: string;
   profile: ExecProfile;
@@ -86,6 +121,7 @@ export function buildExecReceipt(input: {
     allowed: boolean;
     reasons: string[];
   };
+  execRequest?: PlannedExecRequest;
 }): ExecReceipt {
   return {
     ok: input.ok ?? false,
@@ -98,6 +134,7 @@ export function buildExecReceipt(input: {
     preflightProfile: input.profile.preflightProfile,
     backend: input.backend,
     policy: input.policy,
+    execRequest: input.execRequest,
     stdout: input.stdout ?? "",
     stderr: input.stderr ?? "",
     code: input.code ?? null
