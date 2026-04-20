@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import {
   listQueueJobs,
   getQueueJob,
@@ -68,32 +69,89 @@ export interface QueueWorkerRetryResult {
   message: string;
 }
 
-function processQueuedJob(job: QueueJob, request: QueueRequest, existingResult: QueueResult | null) {
+function isLocallyExecutableCommand(command: string): boolean {
+  const normalized = command.trim();
+  return normalized === "node --version" || normalized === "npm --version";
+}
+
+function executeLocally(request: QueueRequest, job: QueueJob): QueueResult {
   const now = new Date().toISOString();
 
+  try {
+    const stdout = execSync(request.command, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+
+    return {
+      queueId: request.queueId,
+      createdAt: request.createdAt,
+      status: "processed",
+      success: true,
+      mode: "executed",
+      stdout: stdout.trim(),
+      stderr: "",
+      code: 0,
+      backend: {
+        type: "local-controlled-worker",
+        available: true,
+        queued: false,
+        queuePath: job.baseDir
+      },
+      processedAt: now
+    };
+  } catch (error: any) {
+    return {
+      queueId: request.queueId,
+      createdAt: request.createdAt,
+      status: "processed",
+      success: false,
+      mode: "backend-unavailable",
+      stdout: error?.stdout?.toString?.().trim?.() || "",
+      stderr: error?.stderr?.toString?.().trim?.() || error?.message || "local execution failed",
+      code: typeof error?.status === "number" ? error.status : 1,
+      backend: {
+        type: "local-controlled-worker",
+        available: true,
+        queued: false,
+        queuePath: job.baseDir
+      },
+      processedAt: now
+    };
+  }
+}
+
+function processQueuedJob(job: QueueJob, request: QueueRequest, existingResult: QueueResult | null) {
   const updatedRequest: QueueRequest = {
     ...request,
     status: "processed"
   };
 
-  const updatedResult: QueueResult = {
-    queueId: request.queueId,
-    createdAt: existingResult?.createdAt || request.createdAt,
-    status: "processed",
-    success: false,
-    mode: "backend-unavailable",
-    stdout: "",
-    stderr:
-      `Queue worker processed the queued request, but no real execution backend is connected yet.`,
-    code: 1,
-    backend: {
-      type: "planned-payload-bridge-worker",
-      available: false,
-      queued: false,
-      queuePath: job.baseDir
-    },
-    processedAt: now
-  };
+  let updatedResult: QueueResult;
+
+  if (isLocallyExecutableCommand(request.command)) {
+    updatedResult = executeLocally(request, job);
+  } else {
+    const now = new Date().toISOString();
+    updatedResult = {
+      queueId: request.queueId,
+      createdAt: existingResult?.createdAt || request.createdAt,
+      status: "processed",
+      success: false,
+      mode: "backend-unavailable",
+      stdout: "",
+      stderr:
+        `Queue worker processed the queued request, but no real execution backend is connected yet.`,
+      code: 1,
+      backend: {
+        type: "planned-payload-bridge-worker",
+        available: false,
+        queued: false,
+        queuePath: job.baseDir
+      },
+      processedAt: now
+    };
+  }
 
   saveQueueRequest(job, updatedRequest);
   saveQueueResult(job, updatedResult);
@@ -101,7 +159,9 @@ function processQueuedJob(job: QueueJob, request: QueueRequest, existingResult: 
   return {
     queueId: job.queueId,
     status: "processed" as const,
-    reason: "queued_job_marked_processed",
+    reason: isLocallyExecutableCommand(request.command)
+      ? "queued_job_executed_locally"
+      : "queued_job_marked_processed",
     resultPath: job.resultPath
   };
 }
