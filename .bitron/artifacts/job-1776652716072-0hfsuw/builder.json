@@ -1,0 +1,148 @@
+{
+  "context": {
+    "jobId": "job-1776652716072-0hfsuw",
+    "agent": "builder-agent",
+    "node": "intradia-vps-2"
+  },
+  "build": "Build ejecutado para \"exec artifacts test\" siguiendo \"Plan generado para: exec artifacts test\"",
+  "probe": {
+    "success": true,
+    "node": "intradia-vps-2",
+    "checks": [
+      {
+        "bin": "node",
+        "found": true,
+        "path": "/usr/bin/node"
+      },
+      {
+        "bin": "npm",
+        "found": true,
+        "path": "/usr/bin/npm"
+      },
+      {
+        "bin": "git",
+        "found": true,
+        "path": "/usr/bin/git"
+      },
+      {
+        "bin": "pwd",
+        "found": true,
+        "path": "/usr/bin/pwd"
+      }
+    ],
+    "raw": {
+      "ok": true,
+      "nodeId": "30276fe423e61109b40d7995427ed4ad2074f9c5f97650133e2ce8d015d40e85",
+      "command": "system.which",
+      "payload": {
+        "bins": {
+          "node": "/usr/bin/node",
+          "npm": "/usr/bin/npm",
+          "git": "/usr/bin/git",
+          "pwd": "/usr/bin/pwd"
+        }
+      },
+      "payloadJSON": "{\"bins\":{\"node\":\"/usr/bin/node\",\"npm\":\"/usr/bin/npm\",\"git\":\"/usr/bin/git\",\"pwd\":\"/usr/bin/pwd\"}}"
+    }
+  },
+  "execProfile": {
+    "id": "node-version-check",
+    "description": "Verifica versión de Node.js en el nodo objetivo",
+    "command": "node",
+    "args": [
+      "--version"
+    ],
+    "requiredBins": [
+      "node"
+    ],
+    "preflightProfile": "nodejs"
+  },
+  "execPolicy": {
+    "allowed": true,
+    "reasons": []
+  },
+  "execRequest": {
+    "tool": "exec",
+    "command": "node --version",
+    "host": "node",
+    "node": "intradia-vps-2",
+    "security": "off",
+    "ask": "off"
+  },
+  "backend": {
+    "backend": "openclaw-exec",
+    "host": "node",
+    "node": "intradia-vps-2",
+    "security": "off",
+    "ask": "off"
+  },
+  "execPlan": {
+    "jobId": "job-1776652716072-0hfsuw",
+    "workflow": "node-build",
+    "node": "intradia-vps-2",
+    "profile": "node-version-check",
+    "command": "node",
+    "args": [
+      "--version"
+    ],
+    "requiredBins": [
+      "node"
+    ],
+    "preflightProfile": "nodejs",
+    "backend": {
+      "backend": "openclaw-exec",
+      "host": "node",
+      "node": "intradia-vps-2",
+      "security": "off",
+      "ask": "off"
+    },
+    "policy": {
+      "allowed": true,
+      "reasons": []
+    },
+    "request": {
+      "tool": "exec",
+      "command": "node --version",
+      "host": "node",
+      "node": "intradia-vps-2",
+      "security": "off",
+      "ask": "off"
+    }
+  },
+  "execReceipt": {
+    "ok": false,
+    "mode": "planned",
+    "node": "intradia-vps-2",
+    "profileId": "node-version-check",
+    "command": "node",
+    "args": [
+      "--version"
+    ],
+    "requiredBins": [
+      "node"
+    ],
+    "preflightProfile": "nodejs",
+    "backend": {
+      "backend": "openclaw-exec",
+      "host": "node",
+      "node": "intradia-vps-2",
+      "security": "off",
+      "ask": "off"
+    },
+    "policy": {
+      "allowed": true,
+      "reasons": []
+    },
+    "execRequest": {
+      "tool": "exec",
+      "command": "node --version",
+      "host": "node",
+      "node": "intradia-vps-2",
+      "security": "off",
+      "ask": "off"
+    },
+    "stdout": "",
+    "stderr": "Execution not implemented yet",
+    "code": 0
+  }
+}

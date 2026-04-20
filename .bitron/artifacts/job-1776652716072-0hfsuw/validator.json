@@ -1,0 +1,9 @@
+{
+  "context": {
+    "jobId": "job-1776652716072-0hfsuw",
+    "agent": "validator-agent",
+    "node": "intradia-vps-2"
+  },
+  "valid": true,
+  "report": "Validación correcta para \"exec artifacts test\""
+}

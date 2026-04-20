@@ -3,7 +3,7 @@ import { plannerAgent, builderAgent, validatorAgent } from "@bitron/agents";
 import { writeArtifact } from "@bitron/artifacts";
 import { appendLog, appendEvent, getJobLogPaths } from "@bitron/logger";
 import { preflightProfile, builderProbeOnNode } from "@bitron/openclaw-adapter";
-import { getExecProfile, buildPlannedExecRequest } from "@bitron/execution";
+import { getExecProfile, buildPlannedExecRequest, buildExecReceipt } from "@bitron/execution";
 import { buildExecutionBackendConfig, checkExecPolicy } from "@bitron/runtime";
 
 export interface WorkflowResult {
@@ -17,6 +17,8 @@ export interface WorkflowResult {
     planner: string;
     builder: string;
     validator: string;
+    execPlan: string;
+    execReceipt: string;
     summary: string;
   };
   logs: {
@@ -83,6 +85,8 @@ async function runWorkflowBase(
         planner: "",
         builder: "",
         validator: "",
+        execPlan: "",
+        execReceipt: "",
         summary: ""
       },
       logs: getJobLogPaths(jobId),
@@ -104,6 +108,7 @@ async function runWorkflowBase(
       }
     });
 
+    writeArtifact(jobId, "summary.json", failedResult);
     return failedResult;
   }
 
@@ -132,6 +137,7 @@ async function runWorkflowBase(
   let execProfile: ReturnType<typeof getExecProfile> = null;
   let execPolicy: ReturnType<typeof checkExecPolicy> | null = null;
   let execRequest: ReturnType<typeof buildPlannedExecRequest> | null = null;
+  let execReceipt: ReturnType<typeof buildExecReceipt> | null = null;
 
   if (builderExecProfileId) {
     execProfile = getExecProfile(builderExecProfileId);
@@ -154,8 +160,37 @@ async function runWorkflowBase(
         security: backend.security,
         ask: backend.ask
       });
+
+      execReceipt = buildExecReceipt({
+        node,
+        profile: execProfile,
+        mode: "planned",
+        ok: false,
+        stdout: "",
+        stderr: "Execution not implemented yet",
+        code: 0,
+        backend,
+        policy: execPolicy,
+        execRequest
+      });
     }
   }
+
+  const execPlan = execProfile
+    ? {
+        jobId,
+        workflow: workflowName,
+        node,
+        profile: execProfile.id,
+        command: execProfile.command,
+        args: execProfile.args,
+        requiredBins: execProfile.requiredBins,
+        preflightProfile: execProfile.preflightProfile,
+        backend,
+        policy: execPolicy,
+        request: execRequest
+      }
+    : null;
 
   const build = builderAgent(builderContext, task, plan.plan, {
     probe,
@@ -165,22 +200,30 @@ async function runWorkflowBase(
     backend
   });
 
+  const builderOutput = {
+    ...build,
+    execPlan,
+    execReceipt
+  };
+
   const builderStepStatus =
     probe.success && (!execPolicy || execPolicy.allowed) ? "ok" : "failed";
 
   steps.push({
     step: "builder",
     status: builderStepStatus,
-    output: build
+    output: builderOutput
   });
 
-  const builderPath = writeArtifact(jobId, "builder.json", build);
+  const builderPath = writeArtifact(jobId, "builder.json", builderOutput);
+  const execPlanPath = execPlan ? writeArtifact(jobId, "exec-plan.json", execPlan) : "";
+  const execReceiptPath = execReceipt ? writeArtifact(jobId, "exec-receipt.json", execReceipt) : "";
 
   appendLog(jobId, `Builder completed on node ${node} with status: ${builderStepStatus}`);
   appendEvent(jobId, {
     level: builderStepStatus === "ok" ? "info" : "error",
     event: "builder_completed",
-    data: build
+    data: builderOutput
   });
 
   const validatorContext = createContext(jobId, "validator-agent", node);
@@ -215,6 +258,8 @@ async function runWorkflowBase(
       planner: plannerPath,
       builder: builderPath,
       validator: validatorPath,
+      execPlan: execPlanPath,
+      execReceipt: execReceiptPath,
       summary: ""
     },
     logs: getJobLogPaths(jobId),
