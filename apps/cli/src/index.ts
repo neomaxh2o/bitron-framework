@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import fs from "node:fs";
+import path from "node:path";
+
 import { createJobId, createContext } from "@bitron/core";
 import { plannerAgent } from "@bitron/agents";
 import {
@@ -37,6 +40,25 @@ function stripOption(name: string): string[] {
   const copy = [...args];
   copy.splice(idx, 2);
   return copy;
+}
+
+function ensureDir(dir: string): void {
+  fs.mkdirSync(dir, { recursive: true });
+}
+
+function writeJson(filePath: string, data: unknown): string {
+  ensureDir(path.dirname(filePath));
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  return filePath;
+}
+
+function buildExecReadyArtifactPaths(jobId: string) {
+  const baseDir = path.join("/root/bitron-framework", ".bitron", "exec-ready", jobId);
+  return {
+    baseDir,
+    execReady: path.join(baseDir, "exec-ready.json"),
+    approvalChecklist: path.join(baseDir, "approval-checklist.json")
+  };
 }
 
 const node = getOption("--node");
@@ -130,7 +152,9 @@ async function main() {
     });
 
     if (command === "exec-ready") {
-      console.log(JSON.stringify({
+      const jobId = createJobId();
+      const readyPayload = {
+        jobId,
         ready: preflight.success && policy.allowed,
         node: targetNode,
         profileId: profile.id,
@@ -140,6 +164,27 @@ async function main() {
         execRequest,
         openclawExecPayload,
         approvalTarget
+      };
+
+      const paths = buildExecReadyArtifactPaths(jobId);
+
+      writeJson(paths.execReady, readyPayload);
+      writeJson(paths.approvalChecklist, {
+        jobId,
+        node: targetNode,
+        profileId: profile.id,
+        command: execRequest.command,
+        suggestedChecks: approvalTarget?.suggestedChecks || [],
+        backend: backendConfig,
+        policy
+      });
+
+      console.log(JSON.stringify({
+        ...readyPayload,
+        artifacts: {
+          execReady: paths.execReady,
+          approvalChecklist: paths.approvalChecklist
+        }
       }, null, 2));
       return;
     }
