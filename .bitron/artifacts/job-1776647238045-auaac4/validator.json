@@ -1,0 +1,9 @@
+{
+  "context": {
+    "jobId": "job-1776647238045-auaac4",
+    "agent": "validator-agent",
+    "node": "marketing-vps-hetzner"
+  },
+  "valid": true,
+  "report": "Validación correcta para \"workflow profile test\""
+}

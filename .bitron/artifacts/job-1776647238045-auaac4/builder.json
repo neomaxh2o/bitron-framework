@@ -1,0 +1,8 @@
+{
+  "context": {
+    "jobId": "job-1776647238045-auaac4",
+    "agent": "builder-agent",
+    "node": "marketing-vps-hetzner"
+  },
+  "build": "Build ejecutado para \"workflow profile test\" siguiendo \"Plan generado para: workflow profile test\""
+}

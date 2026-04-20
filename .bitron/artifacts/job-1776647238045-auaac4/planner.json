@@ -1,0 +1,8 @@
+{
+  "context": {
+    "jobId": "job-1776647238045-auaac4",
+    "agent": "planner-agent",
+    "node": "marketing-vps-hetzner"
+  },
+  "plan": "Plan generado para: workflow profile test"
+}

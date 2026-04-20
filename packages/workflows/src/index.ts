@@ -2,11 +2,13 @@ import { createJobId, createContext } from "@bitron/core";
 import { plannerAgent, builderAgent, validatorAgent } from "@bitron/agents";
 import { writeArtifact } from "@bitron/artifacts";
 import { appendLog, appendEvent, getJobLogPaths } from "@bitron/logger";
-import { preflightBasic } from "@bitron/openclaw-adapter";
+import { preflightProfile } from "@bitron/openclaw-adapter";
 
 export interface WorkflowResult {
   workflow: string;
   jobId: string;
+  node: string;
+  preflightProfile: string;
   status: "ok" | "failed";
   artifacts: {
     preflight: string;
@@ -27,17 +29,24 @@ export interface WorkflowResult {
 }
 
 export async function runStandardDelivery(task: string, requestedNode?: string): Promise<WorkflowResult> {
+  const workflowName = "standard-delivery";
+  const workflowPreflightProfile = "basic";
   const jobId = createJobId();
   const steps: WorkflowResult["steps"] = [];
 
-  appendLog(jobId, `Workflow standard-delivery started for task: ${task}`);
+  appendLog(jobId, `Workflow ${workflowName} started for task: ${task}`);
   appendEvent(jobId, {
     level: "info",
     event: "workflow_started",
-    data: { workflow: "standard-delivery", task, requestedNode: requestedNode || null }
+    data: {
+      workflow: workflowName,
+      task,
+      requestedNode: requestedNode || null,
+      preflightProfile: workflowPreflightProfile
+    }
   });
 
-  const preflight = await preflightBasic(requestedNode);
+  const preflight = await preflightProfile(workflowPreflightProfile, requestedNode);
   const node = preflight.node || requestedNode || "unknown-node";
 
   steps.push({
@@ -48,7 +57,7 @@ export async function runStandardDelivery(task: string, requestedNode?: string):
 
   const preflightPath = writeArtifact(jobId, "preflight.json", preflight);
 
-  appendLog(jobId, `Preflight completed on node ${node} with status: ${preflight.success ? "ok" : "failed"}`);
+  appendLog(jobId, `Preflight(${workflowPreflightProfile}) completed on node ${node} with status: ${preflight.success ? "ok" : "failed"}`);
   appendEvent(jobId, {
     level: preflight.success ? "info" : "error",
     event: "preflight_completed",
@@ -57,8 +66,10 @@ export async function runStandardDelivery(task: string, requestedNode?: string):
 
   if (!preflight.success) {
     const failedResult: WorkflowResult = {
-      workflow: "standard-delivery",
+      workflow: workflowName,
       jobId,
+      node,
+      preflightProfile: workflowPreflightProfile,
       status: "failed",
       artifacts: {
         preflight: preflightPath,
@@ -74,11 +85,16 @@ export async function runStandardDelivery(task: string, requestedNode?: string):
     const summaryPath = writeArtifact(jobId, "summary.json", failedResult);
     failedResult.artifacts.summary = summaryPath;
 
-    appendLog(jobId, "Workflow aborted due to failed preflight");
+    appendLog(jobId, `Workflow aborted due to failed preflight on node ${node}`);
     appendEvent(jobId, {
       level: "error",
       event: "workflow_aborted",
-      data: { reason: "preflight_failed", node, summaryPath }
+      data: {
+        reason: "preflight_failed",
+        node,
+        preflightProfile: workflowPreflightProfile,
+        summaryPath
+      }
     });
 
     return failedResult;
@@ -139,8 +155,10 @@ export async function runStandardDelivery(task: string, requestedNode?: string):
   });
 
   const result: WorkflowResult = {
-    workflow: "standard-delivery",
+    workflow: workflowName,
     jobId,
+    node,
+    preflightProfile: workflowPreflightProfile,
     status: validation.valid ? "ok" : "failed",
     artifacts: {
       preflight: preflightPath,
@@ -160,7 +178,12 @@ export async function runStandardDelivery(task: string, requestedNode?: string):
   appendEvent(jobId, {
     level: result.status === "ok" ? "info" : "error",
     event: "workflow_finished",
-    data: { status: result.status, node, summaryPath }
+    data: {
+      status: result.status,
+      node,
+      preflightProfile: workflowPreflightProfile,
+      summaryPath
+    }
   });
 
   writeArtifact(jobId, "summary.json", result);

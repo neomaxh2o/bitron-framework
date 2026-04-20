@@ -1,0 +1,129 @@
+[
+  {
+    "timestamp": "2026-04-20T01:07:18.046Z",
+    "jobId": "job-1776647238045-auaac4",
+    "level": "info",
+    "event": "workflow_started",
+    "data": {
+      "workflow": "standard-delivery",
+      "task": "workflow profile test",
+      "requestedNode": "marketing-vps-hetzner",
+      "preflightProfile": "basic"
+    }
+  },
+  {
+    "timestamp": "2026-04-20T01:07:21.161Z",
+    "jobId": "job-1776647238045-auaac4",
+    "level": "info",
+    "event": "preflight_completed",
+    "data": {
+      "success": true,
+      "node": "marketing-vps-hetzner",
+      "profile": "basic",
+      "checks": [
+        {
+          "bin": "bash",
+          "found": true,
+          "path": "/usr/bin/bash"
+        },
+        {
+          "bin": "sh",
+          "found": true,
+          "path": "/usr/bin/sh"
+        },
+        {
+          "bin": "node",
+          "found": true,
+          "path": "/usr/bin/node"
+        },
+        {
+          "bin": "npm",
+          "found": true,
+          "path": "/usr/bin/npm"
+        },
+        {
+          "bin": "git",
+          "found": true,
+          "path": "/usr/bin/git"
+        },
+        {
+          "bin": "python3",
+          "found": true,
+          "path": "/usr/bin/python3"
+        }
+      ],
+      "missing": [],
+      "raw": {
+        "ok": true,
+        "nodeId": "fdddd5447bc39d7aa98a5c760bd80806c9f2f6f48099e63f687a3f8de6c2cd7e",
+        "command": "system.which",
+        "payload": {
+          "bins": {
+            "bash": "/usr/bin/bash",
+            "sh": "/usr/bin/sh",
+            "node": "/usr/bin/node",
+            "npm": "/usr/bin/npm",
+            "git": "/usr/bin/git",
+            "python3": "/usr/bin/python3"
+          }
+        },
+        "payloadJSON": "{\"bins\":{\"bash\":\"/usr/bin/bash\",\"sh\":\"/usr/bin/sh\",\"node\":\"/usr/bin/node\",\"npm\":\"/usr/bin/npm\",\"git\":\"/usr/bin/git\",\"python3\":\"/usr/bin/python3\"}}"
+      }
+    }
+  },
+  {
+    "timestamp": "2026-04-20T01:07:21.162Z",
+    "jobId": "job-1776647238045-auaac4",
+    "level": "info",
+    "event": "planner_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776647238045-auaac4",
+        "agent": "planner-agent",
+        "node": "marketing-vps-hetzner"
+      },
+      "plan": "Plan generado para: workflow profile test"
+    }
+  },
+  {
+    "timestamp": "2026-04-20T01:07:21.163Z",
+    "jobId": "job-1776647238045-auaac4",
+    "level": "info",
+    "event": "builder_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776647238045-auaac4",
+        "agent": "builder-agent",
+        "node": "marketing-vps-hetzner"
+      },
+      "build": "Build ejecutado para \"workflow profile test\" siguiendo \"Plan generado para: workflow profile test\""
+    }
+  },
+  {
+    "timestamp": "2026-04-20T01:07:21.164Z",
+    "jobId": "job-1776647238045-auaac4",
+    "level": "info",
+    "event": "validator_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776647238045-auaac4",
+        "agent": "validator-agent",
+        "node": "marketing-vps-hetzner"
+      },
+      "valid": true,
+      "report": "Validación correcta para \"workflow profile test\""
+    }
+  },
+  {
+    "timestamp": "2026-04-20T01:07:21.165Z",
+    "jobId": "job-1776647238045-auaac4",
+    "level": "info",
+    "event": "workflow_finished",
+    "data": {
+      "status": "ok",
+      "node": "marketing-vps-hetzner",
+      "preflightProfile": "basic",
+      "summaryPath": "/root/bitron-framework/.bitron/artifacts/job-1776647238045-auaac4/summary.json"
+    }
+  }
+]

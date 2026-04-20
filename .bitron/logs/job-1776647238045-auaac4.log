@@ -1,0 +1,6 @@
+[2026-04-20T01:07:18.045Z] [job-1776647238045-auaac4] Workflow standard-delivery started for task: workflow profile test
+[2026-04-20T01:07:21.161Z] [job-1776647238045-auaac4] Preflight(basic) completed on node marketing-vps-hetzner with status: ok
+[2026-04-20T01:07:21.162Z] [job-1776647238045-auaac4] Planner completed on node marketing-vps-hetzner
+[2026-04-20T01:07:21.163Z] [job-1776647238045-auaac4] Builder completed on node marketing-vps-hetzner
+[2026-04-20T01:07:21.164Z] [job-1776647238045-auaac4] Validator completed on node marketing-vps-hetzner with status: ok
+[2026-04-20T01:07:21.165Z] [job-1776647238045-auaac4] Workflow finished on node marketing-vps-hetzner with status: ok
