@@ -2,5 +2,8 @@
   "name": "@bitron/openclaw-adapter",
   "version": "1.0.0",
   "type": "module",
-  "main": "src/index.ts"
+  "main": "src/index.ts",
+  "dependencies": {
+    "@bitron/execution-runtime": "workspace:*"
+  }
 }

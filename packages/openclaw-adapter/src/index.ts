@@ -1,6 +1,7 @@
 import { exec } from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
+import { getDefaultNodeExecRuntime } from "@bitron/execution-runtime";
 
 export interface RunResult {
   success: boolean;
@@ -83,6 +84,10 @@ function shellEscapeDouble(value: string): string {
   return value.replace(/(["\\$`])/g, "\\$1");
 }
 
+function shellEscapeSingle(value: string): string {
+  return value.replace(/'/g, `'\\''`);
+}
+
 function execCommand(fullCommand: string): Promise<RunResult> {
   return new Promise((resolve) => {
     exec(fullCommand, (error, stdout, stderr) => {
@@ -117,6 +122,15 @@ function parseWhichPayload(stdout: string): any | null {
 function isSupportedRealExec(spec: ExecSpec): boolean {
   const args = spec.args || [];
   return spec.command === "node" && args.length === 1 && args[0] === "--version";
+}
+
+function buildShellCommand(spec: ExecSpec): string {
+  const args = spec.args || [];
+  const esc = (v: string) => {
+    if (/^[A-Za-z0-9_./:-]+$/.test(v)) return v;
+    return `'${shellEscapeSingle(v)}'`;
+  };
+  return [spec.command, ...args].map(esc).join(" ");
 }
 
 export function listPreflightProfiles(): string[] {
@@ -225,18 +239,25 @@ export async function execOnNode(spec: ExecSpec, node?: string): Promise<ExecOnN
     };
   }
 
-  return {
-    success: false,
+  const runtime = getDefaultNodeExecRuntime();
+  const shellCommand = buildShellCommand(spec);
+
+  const runtimeResult = await runtime.execute({
+    command: shellCommand,
     node: target,
-    mode: "backend-unavailable",
+    security: "off",
+    ask: "off"
+  });
+
+  return {
+    success: runtimeResult.success,
+    node: target,
+    mode: runtimeResult.mode,
     spec,
-    stdout: "",
-    stderr: "El backend real de OpenClaw exec host=node todavía no está disponible desde esta CLI shell. El framework ya quedó restringido y listo para enchufarlo cuando exista ese runtime.",
-    code: 1,
-    backend: {
-      type: "openclaw-exec-host-node",
-      available: false
-    }
+    stdout: runtimeResult.stdout,
+    stderr: runtimeResult.stderr,
+    code: runtimeResult.code,
+    backend: runtimeResult.backend
   };
 }
 
