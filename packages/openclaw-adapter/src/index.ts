@@ -53,11 +53,15 @@ export interface ExecSpec {
 export interface ExecOnNodeResult {
   success: boolean;
   node: string;
-  mode: "planned" | "not-implemented";
+  mode: "planned" | "executed" | "backend-unavailable" | "unsupported-profile";
   spec: ExecSpec;
   stdout: string;
   stderr: string;
   code: number | null;
+  backend?: {
+    type: string;
+    available: boolean;
+  };
 }
 
 const DEFAULT_NODE = "intradia-vps-2";
@@ -108,6 +112,11 @@ function parseWhichPayload(stdout: string): any | null {
   } catch {
     return null;
   }
+}
+
+function isSupportedRealExec(spec: ExecSpec): boolean {
+  const args = spec.args || [];
+  return spec.command === "node" && args.length === 1 && args[0] === "--version";
 }
 
 export function listPreflightProfiles(): string[] {
@@ -200,14 +209,34 @@ export async function builderProbeOnNode(node?: string): Promise<BuilderProbeRes
 export async function execOnNode(spec: ExecSpec, node?: string): Promise<ExecOnNodeResult> {
   const target = node || DEFAULT_NODE;
 
+  if (!isSupportedRealExec(spec)) {
+    return {
+      success: false,
+      node: target,
+      mode: "unsupported-profile",
+      spec,
+      stdout: "",
+      stderr: "execOnNode por ahora solo soporta el caso mínimo controlado: node --version",
+      code: 1,
+      backend: {
+        type: "openclaw-exec-host-node",
+        available: false
+      }
+    };
+  }
+
   return {
     success: false,
     node: target,
-    mode: "not-implemented",
+    mode: "backend-unavailable",
     spec,
     stdout: "",
-    stderr: "execOnNode todavía no está implementado en el adapter. Discovery y preflight sí están activos.",
-    code: 1
+    stderr: "El backend real de OpenClaw exec host=node todavía no está disponible desde esta CLI shell. El framework ya quedó restringido y listo para enchufarlo cuando exista ese runtime.",
+    code: 1,
+    backend: {
+      type: "openclaw-exec-host-node",
+      available: false
+    }
   };
 }
 
