@@ -1,0 +1,33 @@
+{
+  "jobId": "job-1776688280792-r5eds1",
+  "workflow": "node-build",
+  "node": "intradia-vps-2",
+  "profile": "node-version-check",
+  "command": "node",
+  "args": [
+    "--version"
+  ],
+  "requiredBins": [
+    "node"
+  ],
+  "preflightProfile": "nodejs",
+  "backend": {
+    "backend": "openclaw-exec",
+    "host": "node",
+    "node": "intradia-vps-2",
+    "security": "off",
+    "ask": "off"
+  },
+  "policy": {
+    "allowed": true,
+    "reasons": []
+  },
+  "request": {
+    "tool": "exec",
+    "command": "node --version",
+    "host": "node",
+    "node": "intradia-vps-2",
+    "security": "off",
+    "ask": "off"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "ok": false,
+  "mode": "planned",
+  "node": "intradia-vps-2",
+  "profileId": "node-version-check",
+  "command": "node",
+  "args": [
+    "--version"
+  ],
+  "requiredBins": [
+    "node"
+  ],
+  "preflightProfile": "nodejs",
+  "backend": {
+    "backend": "openclaw-exec",
+    "host": "node",
+    "node": "intradia-vps-2",
+    "security": "off",
+    "ask": "off"
+  },
+  "policy": {
+    "allowed": true,
+    "reasons": []
+  },
+  "execRequest": {
+    "tool": "exec",
+    "command": "node --version",
+    "host": "node",
+    "node": "intradia-vps-2",
+    "security": "off",
+    "ask": "off"
+  },
+  "stdout": "",
+  "stderr": "Execution not implemented yet",
+  "code": 0
+}

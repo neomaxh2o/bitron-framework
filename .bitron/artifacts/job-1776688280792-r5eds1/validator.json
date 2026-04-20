@@ -1,0 +1,9 @@
+{
+  "context": {
+    "jobId": "job-1776688280792-r5eds1",
+    "agent": "validator-agent",
+    "node": "intradia-vps-2"
+  },
+  "valid": true,
+  "report": "Validación correcta para \"modularized cli check\""
+}

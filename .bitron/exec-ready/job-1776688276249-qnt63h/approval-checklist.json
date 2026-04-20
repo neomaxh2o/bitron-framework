@@ -1,0 +1,21 @@
+{
+  "jobId": "job-1776688276249-qnt63h",
+  "node": "intradia-vps-2",
+  "profileId": "node-version-check",
+  "command": "node --version",
+  "suggestedChecks": [
+    "openclaw approvals get --node intradia-vps-2 --json",
+    "openclaw nodes describe --node intradia-vps-2"
+  ],
+  "backend": {
+    "backend": "openclaw-exec",
+    "host": "node",
+    "node": "intradia-vps-2",
+    "security": "off",
+    "ask": "off"
+  },
+  "policy": {
+    "allowed": true,
+    "reasons": []
+  }
+}

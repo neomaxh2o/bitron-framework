@@ -1,0 +1,6 @@
+[2026-04-20T12:31:20.793Z] [job-1776688280792-r5eds1] Workflow node-build started for task: modularized cli check
+[2026-04-20T12:31:23.900Z] [job-1776688280792-r5eds1] Preflight(nodejs) completed on node intradia-vps-2 with status: ok
+[2026-04-20T12:31:23.901Z] [job-1776688280792-r5eds1] Planner completed on node intradia-vps-2
+[2026-04-20T12:31:26.927Z] [job-1776688280792-r5eds1] Builder completed on node intradia-vps-2 with status: ok
+[2026-04-20T12:31:26.927Z] [job-1776688280792-r5eds1] Validator completed on node intradia-vps-2 with status: ok
+[2026-04-20T12:31:26.928Z] [job-1776688280792-r5eds1] Workflow finished on node intradia-vps-2 with status: ok
