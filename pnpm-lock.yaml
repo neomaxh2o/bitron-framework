@@ -71,12 +71,18 @@ importers:
       '@bitron/core':
         specifier: workspace:*
         version: link:../core
+      '@bitron/execution':
+        specifier: workspace:*
+        version: link:../execution
       '@bitron/logger':
         specifier: workspace:*
         version: link:../logger
       '@bitron/openclaw-adapter':
         specifier: workspace:*
         version: link:../openclaw-adapter
+      '@bitron/runtime':
+        specifier: workspace:*
+        version: link:../runtime
 
 packages:
 

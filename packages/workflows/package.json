@@ -8,6 +8,8 @@
     "@bitron/agents": "workspace:*",
     "@bitron/artifacts": "workspace:*",
     "@bitron/logger": "workspace:*",
-    "@bitron/openclaw-adapter": "workspace:*"
+    "@bitron/openclaw-adapter": "workspace:*",
+    "@bitron/execution": "workspace:*",
+    "@bitron/runtime": "workspace:*"
   }
 }

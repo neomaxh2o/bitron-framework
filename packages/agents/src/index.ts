@@ -11,12 +11,22 @@ export function builderAgent(
   context: ExecutionContext,
   task: string,
   plan: string,
-  probe?: unknown
+  details?: {
+    probe?: unknown;
+    execProfile?: unknown;
+    execPolicy?: unknown;
+    execRequest?: unknown;
+    backend?: unknown;
+  }
 ) {
   return {
     context,
     build: `Build ejecutado para "${task}" siguiendo "${plan}"`,
-    probe: probe || null
+    probe: details?.probe || null,
+    execProfile: details?.execProfile || null,
+    execPolicy: details?.execPolicy || null,
+    execRequest: details?.execRequest || null,
+    backend: details?.backend || null
   };
 }
 

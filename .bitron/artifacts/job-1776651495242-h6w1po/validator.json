@@ -1,0 +1,9 @@
+{
+  "context": {
+    "jobId": "job-1776651495242-h6w1po",
+    "agent": "validator-agent",
+    "node": "intradia-vps-2"
+  },
+  "valid": true,
+  "report": "Validación correcta para \"planned execution inside builder\""
+}

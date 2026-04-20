@@ -1,0 +1,201 @@
+[
+  {
+    "timestamp": "2026-04-20T02:18:15.243Z",
+    "jobId": "job-1776651495242-h6w1po",
+    "level": "info",
+    "event": "workflow_started",
+    "data": {
+      "workflow": "node-build",
+      "task": "planned execution inside builder",
+      "requestedNode": "intradia-vps-2",
+      "preflightProfile": "nodejs",
+      "builderExecProfileId": "node-version-check"
+    }
+  },
+  {
+    "timestamp": "2026-04-20T02:18:18.288Z",
+    "jobId": "job-1776651495242-h6w1po",
+    "level": "info",
+    "event": "preflight_completed",
+    "data": {
+      "success": true,
+      "node": "intradia-vps-2",
+      "profile": "nodejs",
+      "checks": [
+        {
+          "bin": "bash",
+          "found": true,
+          "path": "/usr/bin/bash"
+        },
+        {
+          "bin": "sh",
+          "found": true,
+          "path": "/usr/bin/sh"
+        },
+        {
+          "bin": "node",
+          "found": true,
+          "path": "/usr/bin/node"
+        },
+        {
+          "bin": "npm",
+          "found": true,
+          "path": "/usr/bin/npm"
+        },
+        {
+          "bin": "git",
+          "found": true,
+          "path": "/usr/bin/git"
+        },
+        {
+          "bin": "pnpm",
+          "found": true,
+          "path": "/usr/bin/pnpm"
+        }
+      ],
+      "missing": [],
+      "raw": {
+        "ok": true,
+        "nodeId": "30276fe423e61109b40d7995427ed4ad2074f9c5f97650133e2ce8d015d40e85",
+        "command": "system.which",
+        "payload": {
+          "bins": {
+            "bash": "/usr/bin/bash",
+            "sh": "/usr/bin/sh",
+            "node": "/usr/bin/node",
+            "npm": "/usr/bin/npm",
+            "git": "/usr/bin/git",
+            "pnpm": "/usr/bin/pnpm"
+          }
+        },
+        "payloadJSON": "{\"bins\":{\"bash\":\"/usr/bin/bash\",\"sh\":\"/usr/bin/sh\",\"node\":\"/usr/bin/node\",\"npm\":\"/usr/bin/npm\",\"git\":\"/usr/bin/git\",\"pnpm\":\"/usr/bin/pnpm\"}}"
+      }
+    }
+  },
+  {
+    "timestamp": "2026-04-20T02:18:18.288Z",
+    "jobId": "job-1776651495242-h6w1po",
+    "level": "info",
+    "event": "planner_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776651495242-h6w1po",
+        "agent": "planner-agent",
+        "node": "intradia-vps-2"
+      },
+      "plan": "Plan generado para: planned execution inside builder"
+    }
+  },
+  {
+    "timestamp": "2026-04-20T02:18:21.291Z",
+    "jobId": "job-1776651495242-h6w1po",
+    "level": "info",
+    "event": "builder_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776651495242-h6w1po",
+        "agent": "builder-agent",
+        "node": "intradia-vps-2"
+      },
+      "build": "Build ejecutado para \"planned execution inside builder\" siguiendo \"Plan generado para: planned execution inside builder\"",
+      "probe": {
+        "success": true,
+        "node": "intradia-vps-2",
+        "checks": [
+          {
+            "bin": "node",
+            "found": true,
+            "path": "/usr/bin/node"
+          },
+          {
+            "bin": "npm",
+            "found": true,
+            "path": "/usr/bin/npm"
+          },
+          {
+            "bin": "git",
+            "found": true,
+            "path": "/usr/bin/git"
+          },
+          {
+            "bin": "pwd",
+            "found": true,
+            "path": "/usr/bin/pwd"
+          }
+        ],
+        "raw": {
+          "ok": true,
+          "nodeId": "30276fe423e61109b40d7995427ed4ad2074f9c5f97650133e2ce8d015d40e85",
+          "command": "system.which",
+          "payload": {
+            "bins": {
+              "node": "/usr/bin/node",
+              "npm": "/usr/bin/npm",
+              "git": "/usr/bin/git",
+              "pwd": "/usr/bin/pwd"
+            }
+          },
+          "payloadJSON": "{\"bins\":{\"node\":\"/usr/bin/node\",\"npm\":\"/usr/bin/npm\",\"git\":\"/usr/bin/git\",\"pwd\":\"/usr/bin/pwd\"}}"
+        }
+      },
+      "execProfile": {
+        "id": "node-version-check",
+        "description": "Verifica versión de Node.js en el nodo objetivo",
+        "command": "node",
+        "args": [
+          "--version"
+        ],
+        "requiredBins": [
+          "node"
+        ],
+        "preflightProfile": "nodejs"
+      },
+      "execPolicy": {
+        "allowed": true,
+        "reasons": []
+      },
+      "execRequest": {
+        "tool": "exec",
+        "command": "node --version",
+        "host": "node",
+        "node": "intradia-vps-2",
+        "security": "off",
+        "ask": "off"
+      },
+      "backend": {
+        "backend": "openclaw-exec",
+        "host": "node",
+        "node": "intradia-vps-2",
+        "security": "off",
+        "ask": "off"
+      }
+    }
+  },
+  {
+    "timestamp": "2026-04-20T02:18:21.292Z",
+    "jobId": "job-1776651495242-h6w1po",
+    "level": "info",
+    "event": "validator_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776651495242-h6w1po",
+        "agent": "validator-agent",
+        "node": "intradia-vps-2"
+      },
+      "valid": true,
+      "report": "Validación correcta para \"planned execution inside builder\""
+    }
+  },
+  {
+    "timestamp": "2026-04-20T02:18:21.293Z",
+    "jobId": "job-1776651495242-h6w1po",
+    "level": "info",
+    "event": "workflow_finished",
+    "data": {
+      "status": "ok",
+      "node": "intradia-vps-2",
+      "preflightProfile": "nodejs",
+      "summaryPath": "/root/bitron-framework/.bitron/artifacts/job-1776651495242-h6w1po/summary.json"
+    }
+  }
+]

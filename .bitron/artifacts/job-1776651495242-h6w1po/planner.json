@@ -1,0 +1,8 @@
+{
+  "context": {
+    "jobId": "job-1776651495242-h6w1po",
+    "agent": "planner-agent",
+    "node": "intradia-vps-2"
+  },
+  "plan": "Plan generado para: planned execution inside builder"
+}

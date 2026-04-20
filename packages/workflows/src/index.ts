@@ -3,6 +3,8 @@ import { plannerAgent, builderAgent, validatorAgent } from "@bitron/agents";
 import { writeArtifact } from "@bitron/artifacts";
 import { appendLog, appendEvent, getJobLogPaths } from "@bitron/logger";
 import { preflightProfile, builderProbeOnNode } from "@bitron/openclaw-adapter";
+import { getExecProfile, buildPlannedExecRequest } from "@bitron/execution";
+import { buildExecutionBackendConfig, checkExecPolicy } from "@bitron/runtime";
 
 export interface WorkflowResult {
   workflow: string;
@@ -32,7 +34,8 @@ async function runWorkflowBase(
   workflowName: string,
   workflowPreflightProfile: string,
   task: string,
-  requestedNode?: string
+  requestedNode?: string,
+  builderExecProfileId?: string
 ): Promise<WorkflowResult> {
   const jobId = createJobId();
   const steps: WorkflowResult["steps"] = [];
@@ -45,7 +48,8 @@ async function runWorkflowBase(
       workflow: workflowName,
       task,
       requestedNode: requestedNode || null,
-      preflightProfile: workflowPreflightProfile
+      preflightProfile: workflowPreflightProfile,
+      builderExecProfileId: builderExecProfileId || null
     }
   });
 
@@ -123,19 +127,58 @@ async function runWorkflowBase(
 
   const builderContext = createContext(jobId, "builder-agent", node);
   const probe = await builderProbeOnNode(node);
-  const build = builderAgent(builderContext, task, plan.plan, probe);
+  const backend = buildExecutionBackendConfig(node);
+
+  let execProfile: ReturnType<typeof getExecProfile> = null;
+  let execPolicy: ReturnType<typeof checkExecPolicy> | null = null;
+  let execRequest: ReturnType<typeof buildPlannedExecRequest> | null = null;
+
+  if (builderExecProfileId) {
+    execProfile = getExecProfile(builderExecProfileId);
+
+    if (execProfile) {
+      const availableBins = preflight.checks.filter((item) => item.found).map((item) => item.bin);
+
+      execPolicy = checkExecPolicy({
+        command: execProfile.command,
+        requiredBins: execProfile.requiredBins,
+        availableBins,
+        preflightSuccess: preflight.success,
+        preflightMissing: preflight.missing
+      });
+
+      execRequest = buildPlannedExecRequest({
+        node,
+        command: execProfile.command,
+        args: execProfile.args,
+        security: backend.security,
+        ask: backend.ask
+      });
+    }
+  }
+
+  const build = builderAgent(builderContext, task, plan.plan, {
+    probe,
+    execProfile,
+    execPolicy,
+    execRequest,
+    backend
+  });
+
+  const builderStepStatus =
+    probe.success && (!execPolicy || execPolicy.allowed) ? "ok" : "failed";
 
   steps.push({
     step: "builder",
-    status: probe.success ? "ok" : "failed",
+    status: builderStepStatus,
     output: build
   });
 
   const builderPath = writeArtifact(jobId, "builder.json", build);
 
-  appendLog(jobId, `Builder completed on node ${node} with probe status: ${probe.success ? "ok" : "failed"}`);
+  appendLog(jobId, `Builder completed on node ${node} with status: ${builderStepStatus}`);
   appendEvent(jobId, {
-    level: probe.success ? "info" : "error",
+    level: builderStepStatus === "ok" ? "info" : "error",
     event: "builder_completed",
     data: build
   });
@@ -158,12 +201,15 @@ async function runWorkflowBase(
     data: validation
   });
 
+  const overallStatus =
+    validation.valid && builderStepStatus === "ok" ? "ok" : "failed";
+
   const result: WorkflowResult = {
     workflow: workflowName,
     jobId,
     node,
     preflightProfile: workflowPreflightProfile,
-    status: validation.valid ? "ok" : "failed",
+    status: overallStatus,
     artifacts: {
       preflight: preflightPath,
       planner: plannerPath,
@@ -200,5 +246,11 @@ export async function runStandardDelivery(task: string, requestedNode?: string):
 }
 
 export async function runNodeBuild(task: string, requestedNode?: string): Promise<WorkflowResult> {
-  return runWorkflowBase("node-build", "nodejs", task, requestedNode);
+  return runWorkflowBase(
+    "node-build",
+    "nodejs",
+    task,
+    requestedNode,
+    "node-version-check"
+  );
 }
