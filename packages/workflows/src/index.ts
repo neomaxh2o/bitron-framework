@@ -2,7 +2,7 @@ import { createJobId, createContext } from "@bitron/core";
 import { plannerAgent, builderAgent, validatorAgent } from "@bitron/agents";
 import { writeArtifact } from "@bitron/artifacts";
 import { appendLog, appendEvent, getJobLogPaths } from "@bitron/logger";
-import { preflightProfile } from "@bitron/openclaw-adapter";
+import { preflightProfile, builderProbeOnNode } from "@bitron/openclaw-adapter";
 
 export interface WorkflowResult {
   workflow: string;
@@ -122,19 +122,20 @@ async function runWorkflowBase(
   });
 
   const builderContext = createContext(jobId, "builder-agent", node);
-  const build = builderAgent(builderContext, task, plan.plan);
+  const probe = await builderProbeOnNode(node);
+  const build = builderAgent(builderContext, task, plan.plan, probe);
 
   steps.push({
     step: "builder",
-    status: "ok",
+    status: probe.success ? "ok" : "failed",
     output: build
   });
 
   const builderPath = writeArtifact(jobId, "builder.json", build);
 
-  appendLog(jobId, `Builder completed on node ${node}`);
+  appendLog(jobId, `Builder completed on node ${node} with probe status: ${probe.success ? "ok" : "failed"}`);
   appendEvent(jobId, {
-    level: "info",
+    level: probe.success ? "info" : "error",
     event: "builder_completed",
     data: build
   });

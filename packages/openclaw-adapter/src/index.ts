@@ -32,6 +32,17 @@ export interface PreflightResult {
   raw?: any;
 }
 
+export interface BuilderProbeResult {
+  success: boolean;
+  node: string;
+  checks: Array<{
+    bin: string;
+    found: boolean;
+    path: string | null;
+  }>;
+  raw?: any;
+}
+
 const DEFAULT_NODE = "intradia-vps-2";
 
 const PREFLIGHT_PROFILES: Record<string, string[]> = {
@@ -145,6 +156,47 @@ export async function preflightProfile(profile = "basic", node?: string): Promis
 
 export async function preflightBasic(node?: string): Promise<PreflightResult> {
   return preflightProfile("basic", node);
+}
+
+export async function builderProbeOnNode(node?: string): Promise<BuilderProbeResult> {
+  const target = node || DEFAULT_NODE;
+  const bins = ["node", "npm", "git", "pwd"];
+  const params = JSON.stringify({ bins }).replace(/(["\\$`])/g, "\\$1");
+  const fullCommand = `openclaw nodes invoke --node ${target} --command system.which --params "${params}"`;
+
+  console.log("[Bitron → OpenClaw builder-probe] Ejecutando:", fullCommand);
+
+  const result = await execCommand(fullCommand);
+
+  if (!result.success) {
+    return {
+      success: false,
+      node: target,
+      checks: bins.map((bin) => ({ bin, found: false, path: null }))
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(result.stdout);
+    const resolvedBins = parsed?.payload?.bins || {};
+
+    return {
+      success: true,
+      node: target,
+      checks: bins.map((bin) => ({
+        bin,
+        found: Boolean(resolvedBins[bin]),
+        path: resolvedBins[bin] || null
+      })),
+      raw: parsed
+    };
+  } catch {
+    return {
+      success: false,
+      node: target,
+      checks: bins.map((bin) => ({ bin, found: false, path: null }))
+    };
+  }
 }
 
 export function runOnNode(command: string, node?: string): Promise<RunResult> {

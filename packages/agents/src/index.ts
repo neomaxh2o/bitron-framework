@@ -7,10 +7,16 @@ export function plannerAgent(context: ExecutionContext, task: string) {
   };
 }
 
-export function builderAgent(context: ExecutionContext, task: string, plan: string) {
+export function builderAgent(
+  context: ExecutionContext,
+  task: string,
+  plan: string,
+  probe?: unknown
+) {
   return {
     context,
-    build: `Build ejecutado para "${task}" siguiendo "${plan}"`
+    build: `Build ejecutado para "${task}" siguiendo "${plan}"`,
+    probe: probe || null
   };
 }
 

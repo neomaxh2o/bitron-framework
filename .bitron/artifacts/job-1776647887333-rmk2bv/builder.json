@@ -1,0 +1,48 @@
+{
+  "context": {
+    "jobId": "job-1776647887333-rmk2bv",
+    "agent": "builder-agent",
+    "node": "intradia-vps-2"
+  },
+  "build": "Build ejecutado para \"validator context fix\" siguiendo \"Plan generado para: validator context fix\"",
+  "probe": {
+    "success": true,
+    "node": "intradia-vps-2",
+    "checks": [
+      {
+        "bin": "node",
+        "found": true,
+        "path": "/usr/bin/node"
+      },
+      {
+        "bin": "npm",
+        "found": true,
+        "path": "/usr/bin/npm"
+      },
+      {
+        "bin": "git",
+        "found": true,
+        "path": "/usr/bin/git"
+      },
+      {
+        "bin": "pwd",
+        "found": true,
+        "path": "/usr/bin/pwd"
+      }
+    ],
+    "raw": {
+      "ok": true,
+      "nodeId": "30276fe423e61109b40d7995427ed4ad2074f9c5f97650133e2ce8d015d40e85",
+      "command": "system.which",
+      "payload": {
+        "bins": {
+          "node": "/usr/bin/node",
+          "npm": "/usr/bin/npm",
+          "git": "/usr/bin/git",
+          "pwd": "/usr/bin/pwd"
+        }
+      },
+      "payloadJSON": "{\"bins\":{\"node\":\"/usr/bin/node\",\"npm\":\"/usr/bin/npm\",\"git\":\"/usr/bin/git\",\"pwd\":\"/usr/bin/pwd\"}}"
+    }
+  }
+}

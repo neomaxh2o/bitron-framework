@@ -1,0 +1,9 @@
+{
+  "context": {
+    "jobId": "job-1776647887333-rmk2bv",
+    "agent": "validator-agent",
+    "node": "intradia-vps-2"
+  },
+  "valid": true,
+  "report": "Validación correcta para \"validator context fix\""
+}
