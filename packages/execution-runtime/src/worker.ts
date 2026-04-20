@@ -1,9 +1,11 @@
 import {
   listQueueJobs,
+  getQueueJob,
   loadQueueRequest,
   loadQueueResult,
   saveQueueRequest,
   saveQueueResult,
+  removeQueueJob,
   type QueueJob,
   type QueueRequest,
   type QueueResult
@@ -19,6 +21,41 @@ export interface QueueWorkerRunOnceResult {
     status: "processed" | "skipped";
     reason: string;
     resultPath: string;
+  }>;
+}
+
+export interface QueueWorkerStatusResult {
+  success: boolean;
+  queueRoot: string;
+  total: number;
+  queued: number;
+  processed: number;
+  unknown: number;
+  jobs: Array<{
+    queueId: string;
+    requestStatus: string;
+    resultStatus: string | null;
+    baseDir: string;
+  }>;
+}
+
+export interface QueueWorkerInspectResult {
+  success: boolean;
+  queueId: string;
+  baseDir: string;
+  request: QueueRequest | null;
+  result: QueueResult | null;
+}
+
+export interface QueueWorkerPurgeResult {
+  success: boolean;
+  queueRoot: string;
+  removed: number;
+  kept: number;
+  jobs: Array<{
+    queueId: string;
+    action: "removed" | "kept";
+    reason: string;
   }>;
 }
 
@@ -95,4 +132,122 @@ export function runQueueWorkerOnce(): QueueWorkerRunOnceResult {
     skipped,
     jobs: results
   };
+}
+
+export function getQueueWorkerStatus(): QueueWorkerStatusResult {
+  const jobs = listQueueJobs();
+
+  let queued = 0;
+  let processed = 0;
+  let unknown = 0;
+
+  const summaryJobs: QueueWorkerStatusResult["jobs"] = jobs.map((job) => {
+    const request = loadQueueRequest(job);
+    const result = loadQueueResult(job);
+
+    if (request.status === "queued") {
+      queued += 1;
+    } else if (request.status === "processed") {
+      processed += 1;
+    } else {
+      unknown += 1;
+    }
+
+    return {
+      queueId: job.queueId,
+      requestStatus: request.status,
+      resultStatus: result?.status || null,
+      baseDir: job.baseDir
+    };
+  });
+
+  return {
+    success: true,
+    queueRoot: "/root/bitron-framework/.bitron/execution-queue",
+    total: jobs.length,
+    queued,
+    processed,
+    unknown,
+    jobs: summaryJobs
+  };
+}
+
+export function inspectQueueJob(queueId: string): QueueWorkerInspectResult {
+  const job = getQueueJob(queueId);
+
+  if (!job) {
+    return {
+      success: false,
+      queueId,
+      baseDir: "",
+      request: null,
+      result: null
+    };
+  }
+
+  return {
+    success: true,
+    queueId,
+    baseDir: job.baseDir,
+    request: loadQueueRequest(job),
+    result: loadQueueResult(job)
+  };
+}
+
+export function purgeProcessedQueueJobs(): QueueWorkerPurgeResult {
+  const jobs = listQueueJobs();
+
+  let removed = 0;
+  let kept = 0;
+
+  const results: QueueWorkerPurgeResult["jobs"] = [];
+
+  for (const job of jobs) {
+    const request = loadQueueRequest(job);
+
+    if (request.status === "processed") {
+      removeQueueJob(job);
+      removed += 1;
+      results.push({
+        queueId: job.queueId,
+        action: "removed",
+        reason: "request_status_is_processed"
+      });
+      continue;
+    }
+
+    kept += 1;
+    results.push({
+      queueId: job.queueId,
+      action: "kept",
+      reason: `request_status_is_${request.status}`
+    });
+  }
+
+  return {
+    success: true,
+    queueRoot: "/root/bitron-framework/.bitron/execution-queue",
+    removed,
+    kept,
+    jobs: results
+  };
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function runQueueWorkerLoop(intervalSeconds = 5): Promise<never> {
+  const safeInterval = Number.isFinite(intervalSeconds) && intervalSeconds > 0 ? intervalSeconds : 5;
+
+  while (true) {
+    const result = runQueueWorkerOnce();
+    console.log(JSON.stringify({
+      ts: new Date().toISOString(),
+      intervalSeconds: safeInterval,
+      run: result
+    }, null, 2));
+
+    await sleep(safeInterval * 1000);
+  }
 }

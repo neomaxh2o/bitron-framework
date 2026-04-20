@@ -84,6 +84,10 @@ async function main() {
   console.log('  pnpm --filter bitron-cli run bitron -- exec-ready node-version-check --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- exec-plan node-version-check --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- queue-worker run-once');
+  console.log('  pnpm --filter bitron-cli run bitron -- queue-worker status');
+  console.log('  pnpm --filter bitron-cli run bitron -- queue-worker inspect <queueId>');
+  console.log('  pnpm --filter bitron-cli run bitron -- queue-worker purge-processed');
+  console.log('  pnpm --filter bitron-cli run bitron -- queue-worker run-loop --interval 5');
 }
 
 main().catch((err) => {

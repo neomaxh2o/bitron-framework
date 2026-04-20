@@ -62,10 +62,18 @@ export type {
 export {
   getQueueRoot,
   listQueueJobs,
+  getQueueJob,
   loadQueueRequest,
   loadQueueResult,
   saveQueueRequest,
-  saveQueueResult
+  saveQueueResult,
+  removeQueueJob
 } from "./queue";
 
-export { runQueueWorkerOnce } from "./worker";
+export {
+  runQueueWorkerOnce,
+  getQueueWorkerStatus,
+  inspectQueueJob,
+  purgeProcessedQueueJobs,
+  runQueueWorkerLoop
+} from "./worker";

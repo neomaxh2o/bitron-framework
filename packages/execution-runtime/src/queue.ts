@@ -73,6 +73,18 @@ export function listQueueJobs(): QueueJob[] {
     .filter((job) => fs.existsSync(job.requestPath));
 }
 
+export function getQueueJob(queueId: string): QueueJob | null {
+  const job = {
+    queueId,
+    baseDir: path.join(QUEUE_ROOT, queueId),
+    requestPath: path.join(QUEUE_ROOT, queueId, "request.json"),
+    resultPath: path.join(QUEUE_ROOT, queueId, "result.json")
+  };
+
+  if (!fs.existsSync(job.requestPath)) return null;
+  return job;
+}
+
 export function loadQueueRequest(job: QueueJob): QueueRequest {
   return readJson<QueueRequest>(job.requestPath);
 }
@@ -88,4 +100,10 @@ export function saveQueueRequest(job: QueueJob, data: QueueRequest): void {
 
 export function saveQueueResult(job: QueueJob, data: QueueResult): void {
   writeJson(job.resultPath, data);
+}
+
+export function removeQueueJob(job: QueueJob): void {
+  if (fs.existsSync(job.baseDir)) {
+    fs.rmSync(job.baseDir, { recursive: true, force: true });
+  }
 }
