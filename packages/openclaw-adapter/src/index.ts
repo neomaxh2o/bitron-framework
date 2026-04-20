@@ -26,12 +26,21 @@ export interface PreflightItem {
 export interface PreflightResult {
   success: boolean;
   node: string;
+  profile: string;
   checks: PreflightItem[];
   missing: string[];
   raw?: any;
 }
 
 const DEFAULT_NODE = "intradia-vps-2";
+
+const PREFLIGHT_PROFILES: Record<string, string[]> = {
+  basic: ["bash", "sh", "node", "npm", "git", "python3"],
+  nodejs: ["bash", "sh", "node", "npm", "git", "pnpm"],
+  devops: ["bash", "sh", "git", "curl", "jq", "systemctl", "docker"],
+  docker: ["bash", "sh", "docker", "docker-compose", "curl"],
+  full: ["bash", "sh", "node", "npm", "pnpm", "git", "python3", "curl", "jq", "systemctl", "docker"]
+};
 
 function getWrapperPath(wrapperName: string): string {
   const safeName = wrapperName.replace(/[^a-zA-Z0-9_-]/g, "");
@@ -53,6 +62,10 @@ function execCommand(fullCommand: string): Promise<RunResult> {
       });
     });
   });
+}
+
+export function listPreflightProfiles(): string[] {
+  return Object.keys(PREFLIGHT_PROFILES);
 }
 
 export async function whichOnNode(bin: string, node?: string): Promise<WhichResult> {
@@ -79,13 +92,13 @@ export async function whichOnNode(bin: string, node?: string): Promise<WhichResu
   }
 }
 
-export async function preflightBasic(node?: string): Promise<PreflightResult> {
+export async function preflightProfile(profile = "basic", node?: string): Promise<PreflightResult> {
   const target = node || DEFAULT_NODE;
-  const bins = ["bash", "sh", "node", "npm", "git", "python3"];
+  const bins = PREFLIGHT_PROFILES[profile] || PREFLIGHT_PROFILES.basic;
   const params = JSON.stringify({ bins }).replace(/(["\\$`])/g, "\\$1");
   const fullCommand = `openclaw nodes invoke --node ${target} --command system.which --params "${params}"`;
 
-  console.log("[Bitron → OpenClaw preflight] Ejecutando:", fullCommand);
+  console.log(`[Bitron → OpenClaw preflight:${profile}] Ejecutando:`, fullCommand);
 
   const result = await execCommand(fullCommand);
 
@@ -93,6 +106,7 @@ export async function preflightBasic(node?: string): Promise<PreflightResult> {
     return {
       success: false,
       node: target,
+      profile,
       checks: bins.map((bin) => ({ bin, found: false, path: null })),
       missing: bins
     };
@@ -113,6 +127,7 @@ export async function preflightBasic(node?: string): Promise<PreflightResult> {
     return {
       success: missing.length === 0,
       node: target,
+      profile,
       checks,
       missing,
       raw: parsed
@@ -121,10 +136,15 @@ export async function preflightBasic(node?: string): Promise<PreflightResult> {
     return {
       success: false,
       node: target,
+      profile,
       checks: bins.map((bin) => ({ bin, found: false, path: null })),
       missing: bins
     };
   }
+}
+
+export async function preflightBasic(node?: string): Promise<PreflightResult> {
+  return preflightProfile("basic", node);
 }
 
 export function runOnNode(command: string, node?: string): Promise<RunResult> {

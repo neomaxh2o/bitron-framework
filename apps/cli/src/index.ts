@@ -2,7 +2,7 @@
 
 import { createJobId, createContext } from "@bitron/core";
 import { plannerAgent } from "@bitron/agents";
-import { runOnNode, runWrapper, whichOnNode, preflightBasic } from "@bitron/openclaw-adapter";
+import { runOnNode, runWrapper, whichOnNode, preflightBasic, preflightProfile, listPreflightProfiles } from "@bitron/openclaw-adapter";
 import { runStandardDelivery } from "@bitron/workflows";
 
 const rawArgs = process.argv.slice(2);
@@ -50,13 +50,24 @@ async function main() {
   if (command === "preflight") {
     const profile = cleanArgs[1];
 
+    if (!profile) {
+      console.error(`Debes indicar un perfil. Disponibles: ${listPreflightProfiles().join(", ")}`);
+      process.exit(1);
+    }
+
     if (profile === "basic") {
       const result = await preflightBasic(node);
       console.log(JSON.stringify(result, null, 2));
       return;
     }
 
-    console.error("Perfil no reconocido. Usá: bitron preflight basic --node <nodo>");
+    if (listPreflightProfiles().includes(profile)) {
+      const result = await preflightProfile(profile, node);
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+
+    console.error(`Perfil no reconocido. Disponibles: ${listPreflightProfiles().join(", ")}`);
     process.exit(1);
   }
 
@@ -93,6 +104,9 @@ async function main() {
   console.log('  pnpm --filter bitron-cli run bitron -- plan "tu tarea" --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- which bash --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- preflight basic --node intradia-vps-2');
+  console.log('  pnpm --filter bitron-cli run bitron -- preflight full --node intradia-vps-2');
+  console.log('  pnpm --filter bitron-cli run bitron -- preflight devops --node marketing-vps-hetzner');
+  console.log('  pnpm --filter bitron-cli run bitron -- preflight nodejs --node eparking');
   console.log('  pnpm --filter bitron-cli run bitron -- run "echo hola" --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- run-wrapper echo "hola mundo" --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- workflow standard-delivery "tu tarea" --node intradia-vps-2');
