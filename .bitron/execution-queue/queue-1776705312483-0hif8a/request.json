@@ -1,0 +1,9 @@
+{
+  "queueId": "queue-1776705312483-0hif8a",
+  "createdAt": "2026-04-20T17:15:12.484Z",
+  "status": "processed",
+  "node": "intradia-vps-2",
+  "command": "node --version",
+  "security": "off",
+  "ask": "off"
+}

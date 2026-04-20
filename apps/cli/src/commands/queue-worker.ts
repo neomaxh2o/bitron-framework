@@ -2,6 +2,7 @@ import {
   getQueueWorkerStatus,
   inspectQueueJob,
   purgeProcessedQueueJobs,
+  retryQueueJob,
   runQueueWorkerLoop,
   runQueueWorkerOnce
 } from "@bitron/execution-runtime";
@@ -54,6 +55,19 @@ export async function handleQueueWorkerCommand(args: string[]) {
     return;
   }
 
+  if (action === "retry") {
+    const queueId = args[2];
+    if (!queueId) {
+      console.error("Uso: bitron queue-worker retry <queueId>");
+      process.exit(1);
+    }
+
+    const result = retryQueueJob(queueId);
+    console.log(JSON.stringify(result, null, 2));
+    if (!result.success) process.exit(1);
+    return;
+  }
+
   if (action === "run-loop") {
     const interval = getInterval(args);
     console.log(JSON.stringify({
@@ -67,6 +81,6 @@ export async function handleQueueWorkerCommand(args: string[]) {
     return;
   }
 
-  console.error("Uso: bitron queue-worker run-once | status | inspect <queueId> | purge-processed | run-loop [--interval 5]");
+  console.error("Uso: bitron queue-worker run-once | status | inspect <queueId> | purge-processed | retry <queueId> | run-loop [--interval 5]");
   process.exit(1);
 }

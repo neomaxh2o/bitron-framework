@@ -87,6 +87,7 @@ async function main() {
   console.log('  pnpm --filter bitron-cli run bitron -- queue-worker status');
   console.log('  pnpm --filter bitron-cli run bitron -- queue-worker inspect <queueId>');
   console.log('  pnpm --filter bitron-cli run bitron -- queue-worker purge-processed');
+  console.log('  pnpm --filter bitron-cli run bitron -- queue-worker retry <queueId>');
   console.log('  pnpm --filter bitron-cli run bitron -- queue-worker run-loop --interval 5');
 }
 

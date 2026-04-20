@@ -75,5 +75,6 @@ export {
   getQueueWorkerStatus,
   inspectQueueJob,
   purgeProcessedQueueJobs,
+  retryQueueJob,
   runQueueWorkerLoop
 } from "./worker";

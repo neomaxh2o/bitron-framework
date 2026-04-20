@@ -59,6 +59,15 @@ export interface QueueWorkerPurgeResult {
   }>;
 }
 
+export interface QueueWorkerRetryResult {
+  success: boolean;
+  queueId: string;
+  baseDir: string;
+  request: QueueRequest | null;
+  result: QueueResult | null;
+  message: string;
+}
+
 function processQueuedJob(job: QueueJob, request: QueueRequest, existingResult: QueueResult | null) {
   const now = new Date().toISOString();
 
@@ -230,6 +239,58 @@ export function purgeProcessedQueueJobs(): QueueWorkerPurgeResult {
     removed,
     kept,
     jobs: results
+  };
+}
+
+export function retryQueueJob(queueId: string): QueueWorkerRetryResult {
+  const job = getQueueJob(queueId);
+
+  if (!job) {
+    return {
+      success: false,
+      queueId,
+      baseDir: "",
+      request: null,
+      result: null,
+      message: "queue job not found"
+    };
+  }
+
+  const request = loadQueueRequest(job);
+  const existingResult = loadQueueResult(job);
+
+  const updatedRequest: QueueRequest = {
+    ...request,
+    status: "queued"
+  };
+
+  const updatedResult: QueueResult = {
+    queueId: request.queueId,
+    createdAt: existingResult?.createdAt || request.createdAt,
+    status: "queued",
+    success: false,
+    mode: "backend-unavailable",
+    stdout: "",
+    stderr: "Queue job re-queued manually. Pending worker processing.",
+    code: 1,
+    backend: {
+      type: "planned-payload-bridge",
+      available: false,
+      queued: true,
+      queuePath: job.baseDir
+    }
+  };
+
+  saveQueueRequest(job, updatedRequest);
+  saveQueueResult(job, updatedResult);
+
+  return {
+    success: true,
+    queueId,
+    baseDir: job.baseDir,
+    request: updatedRequest,
+    result: updatedResult,
+    message: "queue job re-queued"
   };
 }
 
