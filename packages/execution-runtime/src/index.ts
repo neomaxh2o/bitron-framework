@@ -58,3 +58,14 @@ export type {
   BridgeExecuteInput,
   BridgeExecuteResult
 } from "./bridge";
+
+export {
+  getQueueRoot,
+  listQueueJobs,
+  loadQueueRequest,
+  loadQueueResult,
+  saveQueueRequest,
+  saveQueueResult
+} from "./queue";
+
+export { runQueueWorkerOnce } from "./worker";

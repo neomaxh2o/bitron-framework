@@ -11,6 +11,7 @@ import { handleExecProfileListCommand } from "./commands/exec-profile-list";
 import { handleExecReadyCommand } from "./commands/exec-ready";
 import { handleExecPlanCommand } from "./commands/exec-plan";
 import { handleWorkflowCommand } from "./commands/workflow";
+import { handleQueueWorkerCommand } from "./commands/queue-worker";
 
 const rawArgs = process.argv.slice(2);
 const normalizedArgs = normalizeArgs(rawArgs);
@@ -73,10 +74,16 @@ async function main() {
     return;
   }
 
+  if (command === "queue-worker") {
+    await handleQueueWorkerCommand(cleanArgs);
+    return;
+  }
+
   console.log("Uso:");
   console.log('  pnpm --filter bitron-cli run bitron -- exec-profile-list');
   console.log('  pnpm --filter bitron-cli run bitron -- exec-ready node-version-check --node intradia-vps-2');
   console.log('  pnpm --filter bitron-cli run bitron -- exec-plan node-version-check --node intradia-vps-2');
+  console.log('  pnpm --filter bitron-cli run bitron -- queue-worker run-once');
 }
 
 main().catch((err) => {
