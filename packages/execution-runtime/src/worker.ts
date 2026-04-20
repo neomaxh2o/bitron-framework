@@ -71,7 +71,11 @@ export interface QueueWorkerRetryResult {
 
 function isLocallyExecutableCommand(command: string): boolean {
   const normalized = command.trim();
-  return normalized === "node --version" || normalized === "npm --version";
+  return (
+    normalized === "node --version" ||
+    normalized === "npm --version" ||
+    normalized === "git --version"
+  );
 }
 
 function executeLocally(request: QueueRequest, job: QueueJob): QueueResult {

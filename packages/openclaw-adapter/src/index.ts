@@ -125,7 +125,11 @@ function isSupportedRealExec(spec: ExecSpec): boolean {
   const args = spec.args || [];
   const signature = `${spec.command} ${args.join(" ")}`.trim();
 
-  return signature === "node --version" || signature === "npm --version";
+  return (
+    signature === "node --version" ||
+    signature === "npm --version" ||
+    signature === "git --version"
+  );
 }
 
 function buildShellCommand(spec: ExecSpec): string {
@@ -234,7 +238,7 @@ export async function execOnNode(spec: ExecSpec, node?: string): Promise<ExecOnN
       mode: "unsupported-profile",
       spec,
       stdout: "",
-      stderr: "execOnNode por ahora solo soporta los casos mínimos controlados: node --version y npm --version",
+      stderr: "execOnNode por ahora solo soporta los casos mínimos controlados: node --version, npm --version y git --version",
       code: 1,
       backend: {
         type: "openclaw-exec-host-node",
