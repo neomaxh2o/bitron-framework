@@ -1,0 +1,6 @@
+[2026-04-20T00:43:31.665Z] [job-1776645811664-yjtw0m] Workflow standard-delivery started for task: multi node test
+[2026-04-20T00:43:34.831Z] [job-1776645811664-yjtw0m] Preflight completed on node marketing-vps-hetzner with status: ok
+[2026-04-20T00:43:34.831Z] [job-1776645811664-yjtw0m] Planner completed on node marketing-vps-hetzner
+[2026-04-20T00:43:34.832Z] [job-1776645811664-yjtw0m] Builder completed on node marketing-vps-hetzner
+[2026-04-20T00:43:34.832Z] [job-1776645811664-yjtw0m] Validator completed on node marketing-vps-hetzner with status: ok
+[2026-04-20T00:43:34.833Z] [job-1776645811664-yjtw0m] Workflow finished on node marketing-vps-hetzner with status: ok

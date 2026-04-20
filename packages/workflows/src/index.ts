@@ -26,7 +26,7 @@ export interface WorkflowResult {
   }>;
 }
 
-export async function runStandardDelivery(task: string): Promise<WorkflowResult> {
+export async function runStandardDelivery(task: string, requestedNode?: string): Promise<WorkflowResult> {
   const jobId = createJobId();
   const steps: WorkflowResult["steps"] = [];
 
@@ -34,15 +34,11 @@ export async function runStandardDelivery(task: string): Promise<WorkflowResult>
   appendEvent(jobId, {
     level: "info",
     event: "workflow_started",
-    data: { workflow: "standard-delivery", task }
+    data: { workflow: "standard-delivery", task, requestedNode: requestedNode || null }
   });
 
-  // =========================
-  // PRECHECK DEL NODO
-  // =========================
-  const preflight = await preflightBasic();
-
-  const node = preflight.node || "unknown-node";
+  const preflight = await preflightBasic(requestedNode);
+  const node = preflight.node || requestedNode || "unknown-node";
 
   steps.push({
     step: "preflight",
@@ -59,7 +55,6 @@ export async function runStandardDelivery(task: string): Promise<WorkflowResult>
     data: preflight
   });
 
-  // FAIL FAST
   if (!preflight.success) {
     const failedResult: WorkflowResult = {
       workflow: "standard-delivery",
@@ -83,15 +78,12 @@ export async function runStandardDelivery(task: string): Promise<WorkflowResult>
     appendEvent(jobId, {
       level: "error",
       event: "workflow_aborted",
-      data: { reason: "preflight_failed", summaryPath }
+      data: { reason: "preflight_failed", node, summaryPath }
     });
 
     return failedResult;
   }
 
-  // =========================
-  // PLANNER
-  // =========================
   const plannerContext = createContext(jobId, "planner-agent", node);
   const plan = plannerAgent(plannerContext, task);
 
@@ -110,9 +102,6 @@ export async function runStandardDelivery(task: string): Promise<WorkflowResult>
     data: plan
   });
 
-  // =========================
-  // BUILDER
-  // =========================
   const builderContext = createContext(jobId, "builder-agent", node);
   const build = builderAgent(builderContext, task, plan.plan);
 
@@ -131,9 +120,6 @@ export async function runStandardDelivery(task: string): Promise<WorkflowResult>
     data: build
   });
 
-  // =========================
-  // VALIDATOR
-  // =========================
   const validatorContext = createContext(jobId, "validator-agent", node);
   const validation = validatorAgent(validatorContext, task, build.build);
 
@@ -152,9 +138,6 @@ export async function runStandardDelivery(task: string): Promise<WorkflowResult>
     data: validation
   });
 
-  // =========================
-  // RESULTADO FINAL
-  // =========================
   const result: WorkflowResult = {
     workflow: "standard-delivery",
     jobId,
@@ -179,6 +162,8 @@ export async function runStandardDelivery(task: string): Promise<WorkflowResult>
     event: "workflow_finished",
     data: { status: result.status, node, summaryPath }
   });
+
+  writeArtifact(jobId, "summary.json", result);
 
   return result;
 }

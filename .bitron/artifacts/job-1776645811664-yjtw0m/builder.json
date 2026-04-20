@@ -1,0 +1,8 @@
+{
+  "context": {
+    "jobId": "job-1776645811664-yjtw0m",
+    "agent": "builder-agent",
+    "node": "marketing-vps-hetzner"
+  },
+  "build": "Build ejecutado para \"multi node test\" siguiendo \"Plan generado para: multi node test\""
+}

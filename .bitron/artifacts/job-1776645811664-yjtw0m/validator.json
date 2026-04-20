@@ -1,0 +1,9 @@
+{
+  "context": {
+    "jobId": "job-1776645811664-yjtw0m",
+    "agent": "validator-agent",
+    "node": "marketing-vps-hetzner"
+  },
+  "valid": true,
+  "report": "Validación correcta para \"multi node test\""
+}

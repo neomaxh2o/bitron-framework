@@ -1,0 +1,8 @@
+{
+  "context": {
+    "jobId": "job-1776645811664-yjtw0m",
+    "agent": "planner-agent",
+    "node": "marketing-vps-hetzner"
+  },
+  "plan": "Plan generado para: multi node test"
+}

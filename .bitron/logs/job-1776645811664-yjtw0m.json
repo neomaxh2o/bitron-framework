@@ -1,0 +1,126 @@
+[
+  {
+    "timestamp": "2026-04-20T00:43:31.666Z",
+    "jobId": "job-1776645811664-yjtw0m",
+    "level": "info",
+    "event": "workflow_started",
+    "data": {
+      "workflow": "standard-delivery",
+      "task": "multi node test",
+      "requestedNode": "marketing-vps-hetzner"
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:43:34.831Z",
+    "jobId": "job-1776645811664-yjtw0m",
+    "level": "info",
+    "event": "preflight_completed",
+    "data": {
+      "success": true,
+      "node": "marketing-vps-hetzner",
+      "checks": [
+        {
+          "bin": "bash",
+          "found": true,
+          "path": "/usr/bin/bash"
+        },
+        {
+          "bin": "sh",
+          "found": true,
+          "path": "/usr/bin/sh"
+        },
+        {
+          "bin": "node",
+          "found": true,
+          "path": "/usr/bin/node"
+        },
+        {
+          "bin": "npm",
+          "found": true,
+          "path": "/usr/bin/npm"
+        },
+        {
+          "bin": "git",
+          "found": true,
+          "path": "/usr/bin/git"
+        },
+        {
+          "bin": "python3",
+          "found": true,
+          "path": "/usr/bin/python3"
+        }
+      ],
+      "missing": [],
+      "raw": {
+        "ok": true,
+        "nodeId": "fdddd5447bc39d7aa98a5c760bd80806c9f2f6f48099e63f687a3f8de6c2cd7e",
+        "command": "system.which",
+        "payload": {
+          "bins": {
+            "bash": "/usr/bin/bash",
+            "sh": "/usr/bin/sh",
+            "node": "/usr/bin/node",
+            "npm": "/usr/bin/npm",
+            "git": "/usr/bin/git",
+            "python3": "/usr/bin/python3"
+          }
+        },
+        "payloadJSON": "{\"bins\":{\"bash\":\"/usr/bin/bash\",\"sh\":\"/usr/bin/sh\",\"node\":\"/usr/bin/node\",\"npm\":\"/usr/bin/npm\",\"git\":\"/usr/bin/git\",\"python3\":\"/usr/bin/python3\"}}"
+      }
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:43:34.831Z",
+    "jobId": "job-1776645811664-yjtw0m",
+    "level": "info",
+    "event": "planner_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776645811664-yjtw0m",
+        "agent": "planner-agent",
+        "node": "marketing-vps-hetzner"
+      },
+      "plan": "Plan generado para: multi node test"
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:43:34.832Z",
+    "jobId": "job-1776645811664-yjtw0m",
+    "level": "info",
+    "event": "builder_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776645811664-yjtw0m",
+        "agent": "builder-agent",
+        "node": "marketing-vps-hetzner"
+      },
+      "build": "Build ejecutado para \"multi node test\" siguiendo \"Plan generado para: multi node test\""
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:43:34.832Z",
+    "jobId": "job-1776645811664-yjtw0m",
+    "level": "info",
+    "event": "validator_completed",
+    "data": {
+      "context": {
+        "jobId": "job-1776645811664-yjtw0m",
+        "agent": "validator-agent",
+        "node": "marketing-vps-hetzner"
+      },
+      "valid": true,
+      "report": "Validación correcta para \"multi node test\""
+    }
+  },
+  {
+    "timestamp": "2026-04-20T00:43:34.833Z",
+    "jobId": "job-1776645811664-yjtw0m",
+    "level": "info",
+    "event": "workflow_finished",
+    "data": {
+      "status": "ok",
+      "node": "marketing-vps-hetzner",
+      "summaryPath": "/root/bitron-framework/.bitron/artifacts/job-1776645811664-yjtw0m/summary.json"
+    }
+  }
+]
