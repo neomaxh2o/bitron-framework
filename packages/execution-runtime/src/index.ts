@@ -23,6 +23,8 @@ export interface ExecuteNodeCommandResult {
   backend: {
     type: string;
     available: boolean;
+    queued?: boolean;
+    queuePath?: string;
   };
 }
 
