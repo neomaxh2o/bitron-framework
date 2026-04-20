@@ -1,0 +1,17 @@
+{
+  "queueId": "queue-1776715504678-qogvh6",
+  "createdAt": "2026-04-20T20:05:04.678Z",
+  "status": "processed",
+  "success": true,
+  "mode": "executed",
+  "stdout": "10.9.4",
+  "stderr": "",
+  "code": 0,
+  "backend": {
+    "type": "local-controlled-worker",
+    "available": true,
+    "queued": false,
+    "queuePath": "/root/bitron-framework/.bitron/execution-queue/queue-1776715504678-qogvh6"
+  },
+  "processedAt": "2026-04-20T20:05:26.965Z"
+}

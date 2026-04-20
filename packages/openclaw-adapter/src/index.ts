@@ -62,6 +62,8 @@ export interface ExecOnNodeResult {
   backend?: {
     type: string;
     available: boolean;
+    queued?: boolean;
+    queuePath?: string;
   };
 }
 
@@ -121,7 +123,9 @@ function parseWhichPayload(stdout: string): any | null {
 
 function isSupportedRealExec(spec: ExecSpec): boolean {
   const args = spec.args || [];
-  return spec.command === "node" && args.length === 1 && args[0] === "--version";
+  const signature = `${spec.command} ${args.join(" ")}`.trim();
+
+  return signature === "node --version" || signature === "npm --version";
 }
 
 function buildShellCommand(spec: ExecSpec): string {
@@ -230,7 +234,7 @@ export async function execOnNode(spec: ExecSpec, node?: string): Promise<ExecOnN
       mode: "unsupported-profile",
       spec,
       stdout: "",
-      stderr: "execOnNode por ahora solo soporta el caso mínimo controlado: node --version",
+      stderr: "execOnNode por ahora solo soporta los casos mínimos controlados: node --version y npm --version",
       code: 1,
       backend: {
         type: "openclaw-exec-host-node",
