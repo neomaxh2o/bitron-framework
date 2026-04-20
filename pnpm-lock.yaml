@@ -32,6 +32,9 @@ importers:
       '@bitron/openclaw-adapter':
         specifier: workspace:*
         version: link:../../packages/openclaw-adapter
+      '@bitron/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
       '@bitron/workflows':
         specifier: workspace:*
         version: link:../../packages/workflows
@@ -54,6 +57,8 @@ importers:
   packages/logger: {}
 
   packages/openclaw-adapter: {}
+
+  packages/runtime: {}
 
   packages/workflows:
     dependencies:

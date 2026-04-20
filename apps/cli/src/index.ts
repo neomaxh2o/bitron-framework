@@ -12,6 +12,7 @@ import {
   execOnNode
 } from "@bitron/openclaw-adapter";
 import { listExecProfiles, getExecProfile, buildExecReceipt } from "@bitron/execution";
+import { buildExecutionBackendConfig, checkExecPolicy } from "@bitron/runtime";
 import { runStandardDelivery, runNodeBuild } from "@bitron/workflows";
 
 const rawArgs = process.argv.slice(2);
@@ -101,6 +102,18 @@ async function main() {
     }
 
     const targetNode = node || "intradia-vps-2";
+    const backendConfig = buildExecutionBackendConfig(targetNode);
+
+    const preflight = await preflightProfile(profile.preflightProfile, targetNode);
+    const availableBins = preflight.checks.filter((item) => item.found).map((item) => item.bin);
+
+    const policy = checkExecPolicy({
+      command: profile.command,
+      requiredBins: profile.requiredBins,
+      availableBins,
+      preflightSuccess: preflight.success,
+      preflightMissing: preflight.missing
+    });
 
     const adapterResult = await execOnNode(
       {
@@ -114,13 +127,15 @@ async function main() {
       node: targetNode,
       profile,
       mode: adapterResult.success ? "executed" : "planned",
-      ok: adapterResult.success,
+      ok: adapterResult.success && policy.allowed,
       stdout: adapterResult.stdout,
       stderr: adapterResult.stderr,
-      code: adapterResult.code
+      code: adapterResult.code,
+      backend: backendConfig,
+      policy
     });
 
-    console.log(JSON.stringify({ adapterResult, receipt }, null, 2));
+    console.log(JSON.stringify({ preflight, adapterResult, receipt }, null, 2));
     return;
   }
 

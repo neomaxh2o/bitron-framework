@@ -16,6 +16,17 @@ export interface ExecReceipt {
   args: string[];
   requiredBins: string[];
   preflightProfile: string;
+  backend?: {
+    backend: string;
+    host: string;
+    node: string;
+    security: string;
+    ask: string;
+  };
+  policy?: {
+    allowed: boolean;
+    reasons: string[];
+  };
   stdout: string;
   stderr: string;
   code: number | null;
@@ -64,6 +75,17 @@ export function buildExecReceipt(input: {
   stdout?: string;
   stderr?: string;
   code?: number | null;
+  backend?: {
+    backend: string;
+    host: string;
+    node: string;
+    security: string;
+    ask: string;
+  };
+  policy?: {
+    allowed: boolean;
+    reasons: string[];
+  };
 }): ExecReceipt {
   return {
     ok: input.ok ?? false,
@@ -74,6 +96,8 @@ export function buildExecReceipt(input: {
     args: input.profile.args,
     requiredBins: input.profile.requiredBins,
     preflightProfile: input.profile.preflightProfile,
+    backend: input.backend,
+    policy: input.policy,
     stdout: input.stdout ?? "",
     stderr: input.stderr ?? "",
     code: input.code ?? null
