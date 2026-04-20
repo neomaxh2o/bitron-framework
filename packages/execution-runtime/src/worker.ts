@@ -12,9 +12,12 @@ import {
   type QueueResult
 } from "./queue";
 
+export type WorkerBackendMode = "local" | "openclaw-node" | "auto";
+
 export interface QueueWorkerRunOnceResult {
   success: boolean;
   queueRoot: string;
+  backendMode: WorkerBackendMode;
   processed: number;
   skipped: number;
   jobs: Array<{
@@ -67,6 +70,16 @@ export interface QueueWorkerRetryResult {
   request: QueueRequest | null;
   result: QueueResult | null;
   message: string;
+}
+
+function getWorkerBackendMode(): WorkerBackendMode {
+  const raw = (process.env.BITRON_EXEC_BACKEND || "local").trim().toLowerCase();
+
+  if (raw === "local" || raw === "openclaw-node" || raw === "auto") {
+    return raw;
+  }
+
+  return "local";
 }
 
 function isLocallyExecutableCommand(command: string): boolean {
@@ -125,37 +138,98 @@ function executeLocally(request: QueueRequest, job: QueueJob): QueueResult {
   }
 }
 
-function processQueuedJob(job: QueueJob, request: QueueRequest, existingResult: QueueResult | null) {
+function executeViaOpenClawNode(_request: QueueRequest, job: QueueJob): QueueResult {
+  const now = new Date().toISOString();
+
+  return {
+    queueId: job.queueId,
+    createdAt: now,
+    status: "processed",
+    success: false,
+    mode: "backend-unavailable",
+    stdout: "",
+    stderr:
+      "openclaw-node-worker todavía no está implementado. El framework ya quedó listo para seleccionarlo como backend.",
+    code: 1,
+    backend: {
+      type: "openclaw-node-worker",
+      available: false,
+      queued: false,
+      queuePath: job.baseDir
+    },
+    processedAt: now
+  };
+}
+
+function executeWithBackend(request: QueueRequest, job: QueueJob, mode: WorkerBackendMode): QueueResult {
+  if (mode === "local") {
+    if (isLocallyExecutableCommand(request.command)) {
+      return executeLocally(request, job);
+    }
+
+    return {
+      queueId: request.queueId,
+      createdAt: request.createdAt,
+      status: "processed",
+      success: false,
+      mode: "backend-unavailable",
+      stdout: "",
+      stderr: "local backend no soporta este comando controlado",
+      code: 1,
+      backend: {
+        type: "local-controlled-worker",
+        available: true,
+        queued: false,
+        queuePath: job.baseDir
+      },
+      processedAt: new Date().toISOString()
+    };
+  }
+
+  if (mode === "openclaw-node") {
+    return executeViaOpenClawNode(request, job);
+  }
+
+  const openclawAttempt = executeViaOpenClawNode(request, job);
+  if (openclawAttempt.success) {
+    return openclawAttempt;
+  }
+
+  if (isLocallyExecutableCommand(request.command)) {
+    return executeLocally(request, job);
+  }
+
+  return {
+    queueId: request.queueId,
+    createdAt: request.createdAt,
+    status: "processed",
+    success: false,
+    mode: "backend-unavailable",
+    stdout: "",
+    stderr: "auto backend no pudo ejecutar ni por openclaw-node ni por local",
+    code: 1,
+    backend: {
+      type: "auto-worker-fallback",
+      available: false,
+      queued: false,
+      queuePath: job.baseDir
+    },
+    processedAt: new Date().toISOString()
+  };
+}
+
+function processQueuedJob(
+  job: QueueJob,
+  request: QueueRequest,
+  _existingResult: QueueResult | null,
+  backendMode: WorkerBackendMode
+) {
   const updatedRequest: QueueRequest = {
     ...request,
     status: "processed"
   };
 
-  let updatedResult: QueueResult;
-
-  if (isLocallyExecutableCommand(request.command)) {
-    updatedResult = executeLocally(request, job);
-  } else {
-    const now = new Date().toISOString();
-    updatedResult = {
-      queueId: request.queueId,
-      createdAt: existingResult?.createdAt || request.createdAt,
-      status: "processed",
-      success: false,
-      mode: "backend-unavailable",
-      stdout: "",
-      stderr:
-        `Queue worker processed the queued request, but no real execution backend is connected yet.`,
-      code: 1,
-      backend: {
-        type: "planned-payload-bridge-worker",
-        available: false,
-        queued: false,
-        queuePath: job.baseDir
-      },
-      processedAt: now
-    };
-  }
+  const updatedResult = executeWithBackend(request, job, backendMode);
 
   saveQueueRequest(job, updatedRequest);
   saveQueueResult(job, updatedResult);
@@ -163,15 +237,17 @@ function processQueuedJob(job: QueueJob, request: QueueRequest, existingResult: 
   return {
     queueId: job.queueId,
     status: "processed" as const,
-    reason: isLocallyExecutableCommand(request.command)
-      ? "queued_job_executed_locally"
-      : "queued_job_marked_processed",
+    reason:
+      updatedResult.mode === "executed"
+        ? `queued_job_executed_${backendMode}`
+        : `queued_job_processed_${backendMode}`,
     resultPath: job.resultPath
   };
 }
 
 export function runQueueWorkerOnce(): QueueWorkerRunOnceResult {
   const jobs = listQueueJobs();
+  const backendMode = getWorkerBackendMode();
 
   let processed = 0;
   let skipped = 0;
@@ -193,7 +269,7 @@ export function runQueueWorkerOnce(): QueueWorkerRunOnceResult {
       continue;
     }
 
-    const processedResult = processQueuedJob(job, request, existingResult);
+    const processedResult = processQueuedJob(job, request, existingResult, backendMode);
     processed += 1;
     results.push(processedResult);
   }
@@ -201,6 +277,7 @@ export function runQueueWorkerOnce(): QueueWorkerRunOnceResult {
   return {
     success: true,
     queueRoot: "/root/bitron-framework/.bitron/execution-queue",
+    backendMode,
     processed,
     skipped,
     jobs: results
