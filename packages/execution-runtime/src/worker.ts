@@ -1,4 +1,6 @@
 import { execSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import { loadRuntimeConfig } from "@bitron/runtime";
 import {
   listQueueJobs,
@@ -140,18 +142,68 @@ function executeLocally(request: QueueRequest, job: QueueJob): QueueResult {
   }
 }
 
-function executeViaOpenClawNode(_request: QueueRequest, job: QueueJob): QueueResult {
+function executeViaOpenClawNode(request: QueueRequest, job: QueueJob): QueueResult {
   const now = new Date().toISOString();
 
+  const payload = {
+    exec: {
+      command: request.command,
+      host: "node",
+      node: request.node,
+      security: request.security,
+      ask: request.ask
+    }
+  };
+
+  const requestPath = path.join(job.baseDir, "openclaw-request.json");
+  const attemptPath = path.join(job.baseDir, "openclaw-attempt.json");
+
+  try {
+    fs.writeFileSync(requestPath, JSON.stringify(payload, null, 2));
+
+    fs.writeFileSync(
+      attemptPath,
+      JSON.stringify(
+        {
+          queueId: job.queueId,
+          createdAt: now,
+          type: "openclaw-node-exec",
+          payload,
+          note: "Prepared for OpenClaw exec host=node"
+        },
+        null,
+        2
+      )
+    );
+  } catch (err: any) {
+    return {
+      queueId: request.queueId,
+      createdAt: request.createdAt,
+      status: "processed",
+      success: false,
+      mode: "backend-unavailable",
+      stdout: "",
+      stderr: "Failed writing OpenClaw bridge payload: " + (err?.message || String(err)),
+      code: 1,
+      backend: {
+        type: "openclaw-node-worker",
+        available: false,
+        queued: false,
+        queuePath: job.baseDir
+      },
+      processedAt: now
+    };
+  }
+
   return {
-    queueId: job.queueId,
-    createdAt: now,
+    queueId: request.queueId,
+    createdAt: request.createdAt,
     status: "processed",
     success: false,
     mode: "backend-unavailable",
     stdout: "",
     stderr:
-      "openclaw-node-worker todavía no está implementado. La shell en nodos debe ir por exec host=node desde un runtime que tenga acceso real a esa tool.",
+      "OpenClaw bridge preparado. Payload listo en openclaw-request.json. Requiere runtime externo para ejecutar.",
     code: 1,
     backend: {
       type: "openclaw-node-worker",

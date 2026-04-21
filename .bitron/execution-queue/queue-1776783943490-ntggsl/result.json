@@ -1,0 +1,17 @@
+{
+  "queueId": "queue-1776783943490-ntggsl",
+  "createdAt": "2026-04-21T15:05:43.490Z",
+  "status": "processed",
+  "success": false,
+  "mode": "backend-unavailable",
+  "stdout": "",
+  "stderr": "OpenClaw bridge preparado. Payload listo en openclaw-request.json. Requiere runtime externo para ejecutar.",
+  "code": 1,
+  "backend": {
+    "type": "openclaw-node-worker",
+    "available": false,
+    "queued": false,
+    "queuePath": "/root/bitron-framework/.bitron/execution-queue/queue-1776783943490-ntggsl"
+  },
+  "processedAt": "2026-04-21T15:05:44.148Z"
+}

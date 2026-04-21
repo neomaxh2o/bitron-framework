@@ -1,0 +1,15 @@
+{
+  "queueId": "queue-1776783943490-ntggsl",
+  "createdAt": "2026-04-21T15:05:44.148Z",
+  "type": "openclaw-node-exec",
+  "payload": {
+    "exec": {
+      "command": "git --version",
+      "host": "node",
+      "node": "intradia-vps-2",
+      "security": "off",
+      "ask": "off"
+    }
+  },
+  "note": "Prepared for OpenClaw exec host=node"
+}

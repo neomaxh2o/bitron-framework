@@ -1,0 +1,9 @@
+{
+  "exec": {
+    "command": "git --version",
+    "host": "node",
+    "node": "intradia-vps-2",
+    "security": "off",
+    "ask": "off"
+  }
+}
