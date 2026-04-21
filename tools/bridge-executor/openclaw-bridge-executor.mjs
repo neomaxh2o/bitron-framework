@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { execSync } from "node:child_process";
 
 const QUEUE_ROOT = "/root/bitron-framework/.bitron/execution-queue";
 
@@ -17,6 +18,33 @@ function listJobDirs() {
     .readdirSync(QUEUE_ROOT, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => path.join(QUEUE_ROOT, d.name));
+}
+
+function getJobDir(queueId) {
+  const jobDir = path.join(QUEUE_ROOT, queueId);
+  return fs.existsSync(jobDir) ? jobDir : null;
+}
+
+function safeExec(command) {
+  try {
+    const stdout = execSync(command, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+    return {
+      success: true,
+      stdout: stdout.trim(),
+      stderr: "",
+      code: 0
+    };
+  } catch (error) {
+    return {
+      success: false,
+      stdout: error?.stdout?.toString?.().trim?.() || "",
+      stderr: error?.stderr?.toString?.().trim?.() || error?.message || "command failed",
+      code: typeof error?.status === "number" ? error.status : 1
+    };
+  }
 }
 
 function processJob(jobDir) {
@@ -89,8 +117,112 @@ function processJob(jobDir) {
   };
 }
 
-function main() {
+function doctor(queueId) {
+  const jobDir = getJobDir(queueId);
+
+  if (!jobDir) {
+    return {
+      success: false,
+      queueId,
+      message: "queue job not found"
+    };
+  }
+
+  const handoffPath = path.join(jobDir, "openclaw-handoff.json");
+  const handoffExists = fs.existsSync(handoffPath);
+  const handoff = handoffExists ? readJson(handoffPath) : null;
+
+  const openclawVersion = safeExec("openclaw --version");
+
+  const node = handoff?.payload?.exec?.node || null;
+  const command = handoff?.payload?.exec?.command || null;
+
+  return {
+    success: true,
+    queueId,
+    jobDir,
+    checks: {
+      openclawBinary: openclawVersion.success,
+      handoffExists,
+      nodeDetected: Boolean(node),
+      commandDetected: Boolean(command)
+    },
+    openclaw: openclawVersion,
+    payload: handoff?.payload || null,
+    recommendedChecks: node
+      ? [
+          `openclaw approvals get --node ${node} --json`,
+          `openclaw nodes describe --node ${node}`
+        ]
+      : [],
+    nextStep: handoffExists
+      ? "Si approvals y nodo están correctos, este job ya está listo para conectar una ejecución real."
+      : "Primero generá openclaw-handoff.json para este job."
+  };
+}
+
+function exportHandoff(queueId) {
+  const job = getJobDir(queueId);
+
+  if (!job) {
+    return {
+      success: false,
+      queueId,
+      baseDir: "",
+      requestPath: "",
+      handoffPath: "",
+      payload: null,
+      message: "queue job not found"
+    };
+  }
+
+  const requestPath = path.join(job, "openclaw-request.json");
+  const handoffPath = path.join(job, "openclaw-handoff.json");
+
+  if (!fs.existsSync(requestPath)) {
+    return {
+      success: false,
+      queueId,
+      baseDir: job,
+      requestPath,
+      handoffPath,
+      payload: null,
+      message: "openclaw-request.json not found for this job"
+    };
+  }
+
+  const payload = readJson(requestPath);
+
+  const handoff = {
+    queueId,
+    createdAt: new Date().toISOString(),
+    type: "openclaw-exec-handoff",
+    instructions: {
+      note: "Ejecutar este payload desde un runtime/agente con acceso real a la tool exec host=node.",
+      requiredChecks: [
+        `openclaw approvals get --node ${payload?.exec?.node || "<node>"} --json`,
+        `openclaw nodes describe --node ${payload?.exec?.node || "<node>"}`
+      ]
+    },
+    payload
+  };
+
+  writeJson(handoffPath, handoff);
+
+  return {
+    success: true,
+    queueId,
+    baseDir: job,
+    requestPath,
+    handoffPath,
+    payload,
+    message: "openclaw handoff exported"
+  };
+}
+
+function runOnce() {
   const jobs = listJobDirs();
+
   const results = jobs.map(processJob);
 
   const summary = {
@@ -102,6 +234,28 @@ function main() {
   };
 
   console.log(JSON.stringify(summary, null, 2));
+}
+
+function main() {
+  const [, , action, arg] = process.argv;
+
+  if (action === "run-once") {
+    runOnce();
+    return;
+  }
+
+  if (action === "export") {
+    console.log(JSON.stringify(exportHandoff(arg), null, 2));
+    process.exit(0);
+  }
+
+  if (action === "doctor") {
+    console.log(JSON.stringify(doctor(arg), null, 2));
+    process.exit(0);
+  }
+
+  console.error("Uso: node tools/bridge-executor/openclaw-bridge-executor.mjs <run-once|export|doctor> [queueId]");
+  process.exit(1);
 }
 
 main();
