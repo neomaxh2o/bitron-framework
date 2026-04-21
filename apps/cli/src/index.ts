@@ -13,6 +13,7 @@ import { handleExecPlanCommand } from "./commands/exec-plan";
 import { handleWorkflowCommand } from "./commands/workflow";
 import { handleQueueWorkerCommand } from "./commands/queue-worker";
 import { handleConfigCommand } from "./commands/config";
+import { handleOpenClawExecutorCommand } from "./commands/openclaw-executor";
 
 const rawArgs = process.argv.slice(2);
 const normalizedArgs = normalizeArgs(rawArgs);
@@ -85,6 +86,11 @@ async function main() {
     return;
   }
 
+  if (command === "openclaw-executor") {
+    await handleOpenClawExecutorCommand(cleanArgs);
+    return;
+  }
+
   console.log("Uso:");
   console.log('  pnpm --filter bitron-cli run bitron -- exec-profile-list');
   console.log('  pnpm --filter bitron-cli run bitron -- exec-ready node-version-check --node intradia-vps-2');
@@ -97,6 +103,7 @@ async function main() {
   console.log('  pnpm --filter bitron-cli run bitron -- queue-worker run-loop --interval 5');
   console.log('  pnpm --filter bitron-cli run bitron -- config get');
   console.log('  pnpm --filter bitron-cli run bitron -- config set exec-backend <local|openclaw-node|auto>');
+  console.log('  pnpm --filter bitron-cli run bitron -- openclaw-executor run-once');
 }
 
 main().catch((err) => {

@@ -78,3 +78,5 @@ export {
   retryQueueJob,
   runQueueWorkerLoop
 } from "./worker";
+
+export { runOpenClawExecutorOnce } from "./openclaw-executor";

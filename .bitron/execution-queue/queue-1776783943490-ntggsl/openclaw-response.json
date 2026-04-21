@@ -1,0 +1,19 @@
+{
+  "queueId": "queue-1776783943490-ntggsl",
+  "createdAt": "2026-04-21T15:18:50.547Z",
+  "status": "stubbed",
+  "transport": "openclaw-node-executor",
+  "request": {
+    "exec": {
+      "command": "git --version",
+      "host": "node",
+      "node": "intradia-vps-2",
+      "security": "off",
+      "ask": "off"
+    }
+  },
+  "success": false,
+  "stdout": "",
+  "stderr": "OpenClaw executor stub: se detectó un request preparado, pero todavía no existe un runtime con acceso real a exec host=node.",
+  "code": 1
+}
