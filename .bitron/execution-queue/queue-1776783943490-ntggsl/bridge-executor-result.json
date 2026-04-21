@@ -1,0 +1,9 @@
+{
+  "createdAt": "2026-04-21T16:00:33.969Z",
+  "executor": "openclaw-bridge-executor",
+  "success": false,
+  "mode": "backend-unavailable",
+  "stdout": "",
+  "stderr": "Bridge executor stub: el handoff fue consumido correctamente, pero todavía no existe un proceso con acceso real a exec host=node.",
+  "code": 1
+}
