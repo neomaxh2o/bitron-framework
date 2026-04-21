@@ -47,6 +47,10 @@ function safeExec(command) {
   }
 }
 
+function shellEscapeSingle(value) {
+  return String(value).replace(/'/g, `'\\''`);
+}
+
 function processJob(jobDir) {
   const handoffPath = path.join(jobDir, "openclaw-handoff.json");
   const resultPath = path.join(jobDir, "result.json");
@@ -220,6 +224,112 @@ function exportHandoff(queueId) {
   };
 }
 
+function attemptReal(queueId) {
+  const jobDir = getJobDir(queueId);
+
+  if (!jobDir) {
+    return {
+      success: false,
+      queueId,
+      message: "queue job not found"
+    };
+  }
+
+  const handoffPath = path.join(jobDir, "openclaw-handoff.json");
+  const resultPath = path.join(jobDir, "result.json");
+  const attemptRealPath = path.join(jobDir, "bridge-executor-attempt-real.json");
+  const resultRealPath = path.join(jobDir, "bridge-executor-result-real.json");
+
+  if (!fs.existsSync(handoffPath)) {
+    return {
+      success: false,
+      queueId,
+      message: "openclaw-handoff.json not found"
+    };
+  }
+
+  const handoff = readJson(handoffPath);
+  const payload = handoff?.payload?.exec;
+  const now = new Date().toISOString();
+
+  if (!payload?.command || !payload?.node) {
+    return {
+      success: false,
+      queueId,
+      message: "invalid handoff payload"
+    };
+  }
+
+  const realCommand = [
+    "openclaw",
+    "exec",
+    "--host",
+    "node",
+    "--node",
+    payload.node,
+    "--security",
+    payload.security || "off",
+    "--ask",
+    payload.ask || "off",
+    "--",
+    payload.command
+  ].join(" ");
+
+  const attempt = {
+    createdAt: now,
+    executor: "openclaw-bridge-executor",
+    mode: "attempt-real",
+    payload,
+    command: realCommand
+  };
+
+  writeJson(attemptRealPath, attempt);
+
+  const execResult = safeExec(realCommand);
+
+  const realResult = {
+    createdAt: now,
+    executor: "openclaw-bridge-executor",
+    success: execResult.success,
+    mode: execResult.success ? "executed" : "backend-unavailable",
+    stdout: execResult.stdout,
+    stderr: execResult.stderr,
+    code: execResult.code,
+    command: realCommand
+  };
+
+  writeJson(resultRealPath, realResult);
+
+  const updatedResult = {
+    queueId,
+    createdAt: now,
+    status: "processed",
+    success: execResult.success,
+    mode: execResult.success ? "executed" : "backend-unavailable",
+    stdout: execResult.stdout,
+    stderr: execResult.stderr,
+    code: execResult.code,
+    backend: {
+      type: "openclaw-bridge-executor-real",
+      available: execResult.success,
+      queued: false,
+      queuePath: jobDir
+    },
+    processedAt: now
+  };
+
+  writeJson(resultPath, updatedResult);
+
+  return {
+    success: true,
+    queueId,
+    command: realCommand,
+    attemptRealPath,
+    resultRealPath,
+    execResult
+  };
+}
+
 function runOnce() {
   const jobs = listJobDirs();
 
@@ -254,7 +364,12 @@ function main() {
     process.exit(0);
   }
 
-  console.error("Uso: node tools/bridge-executor/openclaw-bridge-executor.mjs <run-once|export|doctor> [queueId]");
+  if (action === "attempt-real") {
+    console.log(JSON.stringify(attemptReal(arg), null, 2));
+    process.exit(0);
+  }
+
+  console.error("Uso: node tools/bridge-executor/openclaw-bridge-executor.mjs <run-once|export|doctor|attempt-real> [queueId]");
   process.exit(1);
 }
 

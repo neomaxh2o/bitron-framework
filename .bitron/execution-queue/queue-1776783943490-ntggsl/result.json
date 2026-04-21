@@ -1,17 +1,17 @@
 {
   "queueId": "queue-1776783943490-ntggsl",
-  "createdAt": "2026-04-21T15:05:43.490Z",
+  "createdAt": "2026-04-21T16:24:57.247Z",
   "status": "processed",
   "success": false,
   "mode": "backend-unavailable",
   "stdout": "",
-  "stderr": "Bridge executor stub consumió openclaw-handoff.json y escribió artifacts de bridge. Pendiente conexión a exec host=node real.",
+  "stderr": "error: unknown command 'exec'",
   "code": 1,
   "backend": {
-    "type": "openclaw-bridge-executor",
+    "type": "openclaw-bridge-executor-real",
     "available": false,
     "queued": false,
     "queuePath": "/root/bitron-framework/.bitron/execution-queue/queue-1776783943490-ntggsl"
   },
-  "processedAt": "2026-04-21T16:00:33.969Z"
+  "processedAt": "2026-04-21T16:24:57.247Z"
 }

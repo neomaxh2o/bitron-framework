@@ -1,0 +1,13 @@
+{
+  "createdAt": "2026-04-21T16:24:57.247Z",
+  "executor": "openclaw-bridge-executor",
+  "mode": "attempt-real",
+  "payload": {
+    "command": "git --version",
+    "host": "node",
+    "node": "intradia-vps-2",
+    "security": "off",
+    "ask": "off"
+  },
+  "command": "openclaw exec --host node --node intradia-vps-2 --security off --ask off -- git --version"
+}
