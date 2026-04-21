@@ -104,6 +104,7 @@ async function main() {
   console.log('  pnpm --filter bitron-cli run bitron -- config get');
   console.log('  pnpm --filter bitron-cli run bitron -- config set exec-backend <local|openclaw-node|auto>');
   console.log('  pnpm --filter bitron-cli run bitron -- openclaw-executor run-once');
+  console.log('  pnpm --filter bitron-cli run bitron -- openclaw-executor export <queueId>');
 }
 
 main().catch((err) => {

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   listQueueJobs,
+  getQueueJob,
   loadQueueResult,
   saveQueueResult,
   type QueueJob,
@@ -20,6 +21,16 @@ export interface OpenClawExecutorRunOnceResult {
   }>;
 }
 
+export interface OpenClawExecutorExportResult {
+  success: boolean;
+  queueId: string;
+  baseDir: string;
+  requestPath: string;
+  handoffPath: string;
+  payload: unknown | null;
+  message: string;
+}
+
 function readJson<T>(filePath: string): T {
   return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
 }
@@ -34,6 +45,10 @@ function getOpenClawRequestPath(job: QueueJob): string {
 
 function getOpenClawResponsePath(job: QueueJob): string {
   return path.join(job.baseDir, "openclaw-response.json");
+}
+
+function getOpenClawHandoffPath(job: QueueJob): string {
+  return path.join(job.baseDir, "openclaw-handoff.json");
 }
 
 function shouldHandleJob(job: QueueJob): boolean {
@@ -127,5 +142,64 @@ export function runOpenClawExecutorOnce(): OpenClawExecutorRunOnceResult {
     processed,
     skipped,
     jobs: results
+  };
+}
+
+export function exportOpenClawHandoff(queueId: string): OpenClawExecutorExportResult {
+  const job = getQueueJob(queueId);
+
+  if (!job) {
+    return {
+      success: false,
+      queueId,
+      baseDir: "",
+      requestPath: "",
+      handoffPath: "",
+      payload: null,
+      message: "queue job not found"
+    };
+  }
+
+  const requestPath = getOpenClawRequestPath(job);
+  const handoffPath = getOpenClawHandoffPath(job);
+
+  if (!fs.existsSync(requestPath)) {
+    return {
+      success: false,
+      queueId,
+      baseDir: job.baseDir,
+      requestPath,
+      handoffPath,
+      payload: null,
+      message: "openclaw-request.json not found for this job"
+    };
+  }
+
+  const payload = readJson<any>(requestPath);
+
+  const handoff = {
+    queueId,
+    createdAt: new Date().toISOString(),
+    type: "openclaw-exec-handoff",
+    instructions: {
+      note: "Ejecutar este payload desde un runtime/agente con acceso real a la tool exec host=node.",
+      requiredChecks: [
+        `openclaw approvals get --node ${payload?.exec?.node || "<node>"} --json`,
+        `openclaw nodes describe --node ${payload?.exec?.node || "<node>"}`
+      ]
+    },
+    payload
+  };
+
+  writeJson(handoffPath, handoff);
+
+  return {
+    success: true,
+    queueId,
+    baseDir: job.baseDir,
+    requestPath,
+    handoffPath,
+    payload,
+    message: "openclaw handoff exported"
   };
 }

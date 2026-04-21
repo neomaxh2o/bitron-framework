@@ -1,0 +1,21 @@
+{
+  "queueId": "queue-1776783943490-ntggsl",
+  "createdAt": "2026-04-21T15:52:50.439Z",
+  "type": "openclaw-exec-handoff",
+  "instructions": {
+    "note": "Ejecutar este payload desde un runtime/agente con acceso real a la tool exec host=node.",
+    "requiredChecks": [
+      "openclaw approvals get --node intradia-vps-2 --json",
+      "openclaw nodes describe --node intradia-vps-2"
+    ]
+  },
+  "payload": {
+    "exec": {
+      "command": "git --version",
+      "host": "node",
+      "node": "intradia-vps-2",
+      "security": "off",
+      "ask": "off"
+    }
+  }
+}

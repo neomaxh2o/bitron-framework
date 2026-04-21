@@ -79,4 +79,7 @@ export {
   runQueueWorkerLoop
 } from "./worker";
 
-export { runOpenClawExecutorOnce } from "./openclaw-executor";
+export {
+  runOpenClawExecutorOnce,
+  exportOpenClawHandoff
+} from "./openclaw-executor";
