@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { loadRuntimeConfig } from "@bitron/runtime";
 import {
   listQueueJobs,
   getQueueJob,
@@ -73,13 +74,14 @@ export interface QueueWorkerRetryResult {
 }
 
 function getWorkerBackendMode(): WorkerBackendMode {
-  const raw = (process.env.BITRON_EXEC_BACKEND || "local").trim().toLowerCase();
+  const envRaw = (process.env.BITRON_EXEC_BACKEND || "").trim().toLowerCase();
 
-  if (raw === "local" || raw === "openclaw-node" || raw === "auto") {
-    return raw;
+  if (envRaw === "local" || envRaw === "openclaw-node" || envRaw === "auto") {
+    return envRaw;
   }
 
-  return "local";
+  const config = loadRuntimeConfig();
+  return config.execBackend;
 }
 
 function isLocallyExecutableCommand(command: string): boolean {
@@ -149,7 +151,7 @@ function executeViaOpenClawNode(_request: QueueRequest, job: QueueJob): QueueRes
     mode: "backend-unavailable",
     stdout: "",
     stderr:
-      "openclaw-node-worker todavía no está implementado. El framework ya quedó listo para seleccionarlo como backend.",
+      "openclaw-node-worker todavía no está implementado. La shell en nodos debe ir por exec host=node desde un runtime que tenga acceso real a esa tool.",
     code: 1,
     backend: {
       type: "openclaw-node-worker",

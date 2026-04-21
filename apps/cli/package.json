@@ -15,7 +15,7 @@
     "@bitron/execution": "workspace:*",
     "@bitron/runtime": "workspace:*",
     "@bitron/execution-runtime": "workspace:*",
-    "tsx": "^4.19.0"
+    "tsx": "^4.21.0"
   },
   "scripts": {
     "bitron": "tsx src/index.ts"

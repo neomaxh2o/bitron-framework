@@ -1,17 +1,31 @@
-export type ExecutionBackend = "openclaw-exec";
-export type ExecutionHost = "node";
-export type ExecutionSecurity = "off" | "allowlist";
-export type ExecutionAsk = "off" | "ask";
+import {
+  getRuntimeConfigPath,
+  loadRuntimeConfig,
+  saveRuntimeConfig,
+  setExecBackend,
+  type BitronExecBackend,
+  type BitronRuntimeConfig
+} from "./config";
+
+export type { BitronExecBackend, BitronRuntimeConfig };
 
 export interface ExecutionBackendConfig {
-  backend: ExecutionBackend;
-  host: ExecutionHost;
+  backend: "openclaw-exec";
+  host: "node";
   node: string;
-  security: ExecutionSecurity;
-  ask: ExecutionAsk;
+  security: "off" | "allowlist";
+  ask: "off" | "ask";
 }
 
-export interface ExecPolicyCheck {
+export interface ExecPolicyInput {
+  command: string;
+  requiredBins: string[];
+  availableBins: string[];
+  preflightSuccess: boolean;
+  preflightMissing: string[];
+}
+
+export interface ExecPolicyResult {
   allowed: boolean;
   reasons: string[];
 }
@@ -26,31 +40,16 @@ export function buildExecutionBackendConfig(node: string): ExecutionBackendConfi
   };
 }
 
-export function checkExecPolicy(input: {
-  command: string;
-  requiredBins: string[];
-  availableBins: string[];
-  preflightSuccess: boolean;
-  preflightMissing?: string[];
-}): ExecPolicyCheck {
+export function checkExecPolicy(input: ExecPolicyInput): ExecPolicyResult {
   const reasons: string[] = [];
-
-  if (!input.command) {
-    reasons.push("missing_command");
-  }
 
   if (!input.preflightSuccess) {
     reasons.push("preflight_failed");
   }
 
-  const missingRequiredBins = input.requiredBins.filter((bin) => !input.availableBins.includes(bin));
-  if (missingRequiredBins.length > 0) {
-    reasons.push(`missing_required_bins:${missingRequiredBins.join(",")}`);
-  }
-
-  const missingProfileBins = (input.preflightMissing || []).filter(Boolean);
-  if (missingProfileBins.length > 0) {
-    reasons.push(`missing_profile_bins:${missingProfileBins.join(",")}`);
+  const missingRequired = input.requiredBins.filter((bin) => !input.availableBins.includes(bin));
+  if (missingRequired.length > 0) {
+    reasons.push(`missing_required_bins:${missingRequired.join(",")}`);
   }
 
   return {
@@ -58,3 +57,10 @@ export function checkExecPolicy(input: {
     reasons
   };
 }
+
+export {
+  getRuntimeConfigPath,
+  loadRuntimeConfig,
+  saveRuntimeConfig,
+  setExecBackend
+};
